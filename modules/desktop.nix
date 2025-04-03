@@ -22,26 +22,27 @@
 
   # Setup desktop services
   services.xserver.displayManager = {
-     defaultSession = "plasma6+i3";
+     defaultSession = "plasma6-i3wm+i3";
      session = [
          {
              manage = "desktop";
-             name = "plasma6+i3";
+             name = "plasma6-i3wm";
              start = ''exec env KDEWM=${pkgs.i3-gaps}/bin/i3 ${pkgs.plasma-workspace}/bin/startplasma-x11'';
          }
-         {
-             manage = "desktop";
-             name = "i3";
-             start = ''exec ${pkgs.i3-gaps}/bin/i3'';
-         }
-         {
-             manage = "desktop";
-             name = "plasma6";
-             start = ''exec ${pkgs.plasma-workspace}/bin/startplasma-x11'';
-         }
+         #{
+         #    manage = "desktop";
+         #    name = "i3";
+         #    start = ''exec ${pkgs.i3-gaps}/bin/i3'';
+         #}
+         #{
+         #    manage = "desktop";
+         #    name = "plasma6";
+         #    start = ''exec ${pkgs.plasma-workspace}/bin/startplasma-x11'';
+         #}
      ];
  };
-  
+  # Disable plasma kwin window manager
+  systemd.user.services.plasma-kwin_x11.enable = false;
 
   # Enable the Plasma Desktop Environment.
   services.displayManager.sddm.enable = true;
