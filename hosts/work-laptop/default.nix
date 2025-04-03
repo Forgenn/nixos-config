@@ -8,8 +8,6 @@
     # You could import other laptop-specific modules here
   ];
 
-  
-
   # Hostname
   networking.hostName = "nixos";
   
@@ -55,16 +53,35 @@
   ##########################
   #  Program configuration
   ##########################
-  home-manager.users.${user} = {pkgs, ...}: {
-  programs.ssh.enable = true;
+  home-manager.users.${user} = {
+    programs.ssh.enable = true;
   
-  programs.git = {
+    programs.git = {
       # Use lib.mkOverride to ensure these values take precedence over
       # any potential definitions in home.nix or common.nix.
       # Priority 10 is a common choice for overrides.
       userName = lib.mkOverride 10 "ntb";
       userEmail = lib.mkOverride 10 "pol.monedero@aistechspace.com";
     };
+
+    # --- Configure i3 Startup for Work Laptop Display Layout ---
+    # Define host-specific i3 startup commands here.
+    # These will be MERGED with the startup items defined in home-manager/modules/i3.nix
+    # thanks to the Nix/Home Manager module system's list merging.
+    xsession.windowManager.i3.config.startup = lib.mkAfter [
+      {
+        # Use 'exec --no-startup-id' or just 'command' if HM handles exec wrapper
+        # Using a direct command string is typical here.
+        command = "${pkgs.xorg.xrandr}/bin/xrandr --output eDP-1 --primary --mode 2560x1600 --pos 3000x824 --rotate normal --scale 0.5x0.5 --filter nearest --auto --output DP-7 --mode 1920x1080 --pos 0x0 --rotate left   --scale 1x1 --auto --output DP-8 --mode 1920x1080 --pos 1080x420 --rotate normal --scale 1x1 --auto";
+        # These settings ensure it runs once at startup and not on i3 reload
+        always = false;
+        notification = false;
+      }
+    ];
+
+    # Add other work-laptop-specific HM settings for 'ntb' here if needed
+    # e.g., enabling specific work applications or services
+
   
   #home.homeDirectory = /home/${user};
 

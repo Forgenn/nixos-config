@@ -61,6 +61,7 @@
 
   # Add some common desktop packages
   environment.systemPackages = with pkgs; [
-    kdePackages.knewstuff 
+    kdePackages.knewstuff
+    kdePackages.kscreen 
   ];
 }
