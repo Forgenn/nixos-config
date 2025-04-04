@@ -10,8 +10,13 @@
 
   # Hostname
   networking.hostName = "nixos";
-  
+  networking.networkmanager.enable = true;
+  networking.wireless.iwd.enable = true;
+  networking.networkmanager.wifi.backend = "iwd";
   # Laptop specific settings
+ 
+ 
+  boot.kernelPackages = pkgs.linuxPackages_latest;
 
   # Enable bluetooth
   hardware.bluetooth.enable = true;
@@ -22,7 +27,10 @@
 
   # Enable docker
   virtualisation.docker.enable = true;
-  
+
+  services.upower.enable = true;
+  powerManagement.enable = true;
+
   # Define the primary user account on this system
   users.users.${user} = {
     isNormalUser = true;
@@ -47,6 +55,10 @@
         vscode
         ghostty
         slack
+	barrier
+	kdePackages.powerdevil
+  	kdePackages.kwallet
+	kdePackages.kwallet-pam
         kdePackages.plasma-browser-integration
         kdePackages.plasma-thunderbolt
    ];
@@ -72,7 +84,7 @@
       {
         # Use 'exec --no-startup-id' or just 'command' if HM handles exec wrapper
         # Using a direct command string is typical here.
-        command = "${pkgs.xorg.xrandr}/bin/xrandr --output eDP-1 --primary --mode 2560x1600 --pos 3000x824 --rotate normal --scale 0.5x0.5 --filter nearest --auto --output DP-7 --mode 1920x1080 --pos 0x0 --rotate left   --scale 1x1 --auto --output DP-8 --mode 1920x1080 --pos 1080x420 --rotate normal --scale 1x1 --auto";
+        command = "${pkgs.xorg.xrandr}/bin/xrandr --output eDP-1 --primary --mode 2560x1600 --pos 3000x824 --rotate normal --scale 1x1 --auto --output DP-7 --mode 1920x1080 --pos 0x0 --rotate left   --scale 1x1 --auto --output DP-8 --mode 1920x1080 --pos 1080x420 --rotate normal --scale 1x1 --auto";
         # These settings ensure it runs once at startup and not on i3 reload
         always = false;
         notification = false;

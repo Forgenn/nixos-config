@@ -158,7 +158,7 @@
         startup = [
             #{ command = "${pkgs.dex}/bin/dex --autostart --environment i3"; notification = false; always = true; }
             { command = "${pkgs.feh}/bin/feh --bg-fill --no-xinerama ~/.local/share/themes/re-wall.jpg"; notification = false; always = true; }
-            { command = "${pkgs.dunst}/bin/dunst"; notification = false; always = true; } 
+            #{ command = "${pkgs.dunst}/bin/dunst"; notification = false; always = true; } 
             { command = "${pkgs.picom}/bin/picom"; notification = false; always = true; }
 	    ];
          bars = [ { command = ":"; } ]; # Optional bar config

@@ -166,7 +166,8 @@
 	ghostty
         slack
         plasma-browser-integration
-	kdePackages.plasma-thunderbolt     
+	kdePackages.plasma-thunderbolt
+        kdePackages.plasma-nm 
    ];
  
   # Some programs need SUID wrappers, can be configured further or are
