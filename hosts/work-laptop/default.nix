@@ -56,9 +56,14 @@
         ghostty
         slack
 	buf
+	# Programming things
+	uv
+	# GCP things
  	google-cloud-sdk
 	k9s
 	kubectl
+	(pkgs.google-cloud-sdk.withExtraComponents [pkgs.google-cloud-sdk.components.gke-gcloud-auth-plugin])
+	#Kde things
 	kdePackages.powerdevil
   	kdePackages.kwallet
 	kdePackages.kwallet-pam
@@ -69,11 +74,8 @@
   #  Program configuration
   ##########################
   home-manager.users.${user} = {
-    programs.ssh.enable = true;
-    home.packages = with pkgs; [
-  (google-cloud-sdk.withExtraComponents [google-cloud-sdk.components.gke-gcloud-auth-plugin])
-   ]; 
-    programs.git = {
+   programs.ssh.enable = true;
+   programs.git = {
       # Use lib.mkOverride to ensure these values take precedence over
       # any potential definitions in home.nix or common.nix.
       # Priority 10 is a common choice for overrides.
