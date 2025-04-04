@@ -55,7 +55,10 @@
         vscode
         ghostty
         slack
-	barrier
+	buf
+ 	google-cloud-sdk
+	k9s
+	kubectl
 	kdePackages.powerdevil
   	kdePackages.kwallet
 	kdePackages.kwallet-pam
@@ -67,7 +70,9 @@
   ##########################
   home-manager.users.${user} = {
     programs.ssh.enable = true;
-  
+    home.packages = with pkgs; [
+  (google-cloud-sdk.withExtraComponents [google-cloud-sdk.components.gke-gcloud-auth-plugin])
+   ]; 
     programs.git = {
       # Use lib.mkOverride to ensure these values take precedence over
       # any potential definitions in home.nix or common.nix.
