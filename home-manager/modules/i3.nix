@@ -23,7 +23,7 @@
         # All your previous config settings go here:
         modifier = mod;
         terminal = terminal; # Define i3 variable (used internally by HM potentially)
-        fonts = [ "pango:monospace 8" ];
+        fonts = { names = [ "pango:monospace 8" ]; };
         gaps = { inner = 10; };
         window.border = 0;
         #window.defaultFloatingBorder = "pixel 0";

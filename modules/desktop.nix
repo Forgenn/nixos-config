@@ -11,6 +11,7 @@
     extraPackages = with pkgs; [
       feh
       rofi
+      rofi-power-menu
       picom
     ];
   };
@@ -25,10 +26,10 @@
     programs.rofi.enable = true; 
     programs.rofi.theme = "solarized_alternate.rasi";
   };
-
+  
+  services.displayManager.defaultSession = "plasma6-i3wm+i3";
   # Setup desktop services
   services.xserver.displayManager = {
-     defaultSession = "plasma6-i3wm+i3";
      session = [
          {
              manage = "desktop";

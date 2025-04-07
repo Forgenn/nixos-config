@@ -30,6 +30,7 @@
 
   services.upower.enable = true;
   powerManagement.enable = true;
+  services.power-profiles-daemon.enable = true;
 
   # Define the primary user account on this system
   users.users.${user} = {
