@@ -58,6 +58,7 @@
 	buf
 	# Programming things
 	uv
+	python311
 	# GCP things
  	google-cloud-sdk
 	k9s

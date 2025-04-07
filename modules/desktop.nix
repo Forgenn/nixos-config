@@ -15,10 +15,16 @@
     ];
   };
   
-  # Import i3 hm configuration
-  home-manager.users.${user}.imports = [
-    ../home-manager/modules/i3.nix
-  ];
+  # hm configuration
+  home-manager.users.${user} = {
+	
+    imports = [
+      ../home-manager/modules/i3.nix
+    ];
+    
+    programs.rofi.enable = true; 
+    programs.rofi.theme = "solarized_alternate.rasi";
+  };
 
   # Setup desktop services
   services.xserver.displayManager = {
