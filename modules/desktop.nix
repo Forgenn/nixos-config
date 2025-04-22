@@ -34,7 +34,7 @@
          {
              manage = "desktop";
              name = "plasma6-i3wm";
-             start = ''exec env KDEWM=${pkgs.i3-gaps}/bin/i3 ${pkgs.plasma-workspace}/bin/startplasma-x11'';
+             start = ''exec env KDEWM=${pkgs.i3-gaps}/bin/i3 ${pkgs.kdePackages.plasma-workspace}/bin/startplasma-x11'';
          }
          #{
          #    manage = "desktop";

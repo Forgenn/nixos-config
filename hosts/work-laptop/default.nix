@@ -93,12 +93,23 @@
       {
         # Use 'exec --no-startup-id' or just 'command' if HM handles exec wrapper
         # Using a direct command string is typical here.
-        command = "${pkgs.xorg.xrandr}/bin/xrandr --output eDP-1 --primary --mode 2560x1600 --pos 3000x824 --rotate normal --scale 1x1 --auto --output DP-7 --mode 1920x1080 --pos 0x0 --rotate left   --scale 1x1 --auto --output DP-8 --mode 1920x1080 --pos 1080x420 --rotate normal --scale 1x1 --auto";
+        command = "${pkgs.xorg.xrandr}/bin/xrandr --output eDP-1 --primary --mode 2560x1600 --pos 3000x824 --rotate normal --scale 1x1 --auto --output DP-10 --mode 1920x1080 --pos 0x0 --rotate left   --scale 1x1 --auto --output DP-9 --mode 1920x1080 --pos 1080x420 --rotate normal --scale 1x1 --auto";
         # These settings ensure it runs once at startup and not on i3 reload
         always = false;
         notification = false;
       }
     ];
+    xsession.windowManager.i3.config.workspaceOutputAssign = lib.mkOverride 10 [
+            { output = "eDP-1"; workspace = "1"; }
+            { output = "eDP-1"; workspace = "2"; }
+            { output = "eDP-1"; workspace = "3"; }
+            { output = "DP-10"; workspace = "4"; }
+            { output = "DP-10"; workspace = "5"; }
+            { output = "DP-10"; workspace = "6"; }
+            { output = "DP-9"; workspace = "7"; }
+            { output = "DP-9"; workspace = "8"; }
+            { output = "DP-9"; workspace = "9"; }
+     ];
 
     # Add other work-laptop-specific HM settings for 'ntb' here if needed
     # e.g., enabling specific work applications or services

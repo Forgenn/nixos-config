@@ -43,7 +43,7 @@
            AddKeysToAgent yes
            Hostname github.com
            IdentitiesOnly yes
-           IdentityFile  ~/.ssh/id_ed25519
+           IdentityFile  ~/.ssh/id_ed25519_ais
 
         Host gitlab
           AddKeysToAgent yes
