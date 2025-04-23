@@ -39,13 +39,19 @@
    enable = true;
    # Impure Identity file config? Throws purity error if not a literal
    extraConfig = ''
-        Host github
+        Host github.com
            AddKeysToAgent yes
            Hostname github.com
            IdentitiesOnly yes
            IdentityFile  ~/.ssh/id_ed25519_ais
 
-        Host gitlab
+        Host p.github.com
+           AddKeysToAgent no
+           Hostname github.com
+           IdentitiesOnly yes
+           IdentityFile  ~/.ssh/id_ed25519
+        
+	Host gitlab.com
           AddKeysToAgent yes
           Hostname gitlab.com
           IdentitiesOnly yes

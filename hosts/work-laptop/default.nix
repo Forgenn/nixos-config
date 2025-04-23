@@ -46,7 +46,7 @@
   security.sudo.wheelNeedsPassword = true; # Or true if you prefer
 
   # Firewall settings (example)
-  networking.firewall.enable = true;
+  # networking.firewall.enable = true;
   # networking.firewall.allowedTCPPorts = [ ... ];
   # networking.firewall.allowedUDPPorts = [ ... ];
 
@@ -60,6 +60,8 @@
 	# Programming things
 	uv
 	python311
+	python312
+	postman
 	# GCP things
  	google-cloud-sdk
 	k9s
@@ -103,12 +105,12 @@
             { output = "eDP-1"; workspace = "1"; }
             { output = "eDP-1"; workspace = "2"; }
             { output = "eDP-1"; workspace = "3"; }
-            { output = "DP-10"; workspace = "4"; }
-            { output = "DP-10"; workspace = "5"; }
-            { output = "DP-10"; workspace = "6"; }
-            { output = "DP-9"; workspace = "7"; }
-            { output = "DP-9"; workspace = "8"; }
-            { output = "DP-9"; workspace = "9"; }
+            { output = "DP-7"; workspace = "4"; }
+            { output = "DP-7"; workspace = "5"; }
+            { output = "DP-7"; workspace = "6"; }
+            { output = "DP-8"; workspace = "7"; }
+            { output = "DP-8"; workspace = "8"; }
+            { output = "DP-8"; workspace = "9"; }
      ];
 
     # Add other work-laptop-specific HM settings for 'ntb' here if needed
