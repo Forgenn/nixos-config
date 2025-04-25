@@ -5,7 +5,7 @@
   inputs = {
     # Nixpkgs (stable or unstable, choose one)
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.11"; # Or nixos-23.11, etc.
-
+    nixpkgs-unstable.url = "nixpkgs/nixos-unstable";
     # Home Manager
     home-manager = {
       url = "github:nix-community/home-manager/release-24.11";
@@ -25,6 +25,9 @@
           specialArgs = { inherit inputs user; }; # Pass inputs and user info down to modules
 
           modules = [
+	    # Enable access to unstable packages
+	    ({ config, pkgs, ... }: { nixpkgs.overlays = [ overlay-unstable ]; })
+
             # Import host-specific configuration
             ./hosts/${device}
 
@@ -49,6 +52,13 @@
             # Add any extra modules specific to this host invocation
           ] ++ extraModules;
         };
+      overlay-unstable = final: prev: {
+        #unstable = nixpkgs-unstable.legacyPackages.${prev.system};
+        unstable = import nixpkgs-unstable {
+           inherit system;
+           config.allowUnfree = true;
+        };
+      };
 
     in {
       # Define NixOS configurations for each host

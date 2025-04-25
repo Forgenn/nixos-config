@@ -51,12 +51,13 @@
   # networking.firewall.allowedUDPPorts = [ ... ];
 
   # Laptop specific packages (less common, prefer home-manager)
-  environment.systemPackages = with pkgs; [ 
+   environment.systemPackages = with pkgs; [ 
         pkgs.chromium
         vscode
         ghostty
         slack
 	buf
+	pkgs.unstable.deskflow
 	# Programming things
 	uv
 	python311
@@ -74,6 +75,7 @@
         kdePackages.plasma-browser-integration
         kdePackages.plasma-thunderbolt
    ];
+  
   ##########################
   #  Program configuration
   ##########################
