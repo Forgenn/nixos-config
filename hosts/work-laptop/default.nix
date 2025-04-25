@@ -50,28 +50,33 @@
   # networking.firewall.allowedTCPPorts = [ ... ];
   # networking.firewall.allowedUDPPorts = [ ... ];
 
+  fonts.packages = with pkgs; [
+    fira-code
+    fira-code-symbols
+  ];
   # Laptop specific packages (less common, prefer home-manager)
    environment.systemPackages = with pkgs; [ 
         pkgs.chromium
         vscode
         ghostty
+        starship
         slack
-	buf
-	pkgs.unstable.deskflow
-	# Programming things
-	uv
-	python311
-	python312
-	postman
-	# GCP things
- 	google-cloud-sdk
-	k9s
-	kubectl
-	(pkgs.google-cloud-sdk.withExtraComponents [pkgs.google-cloud-sdk.components.gke-gcloud-auth-plugin])
-	#Kde things
-	kdePackages.powerdevil
-  	kdePackages.kwallet
-	kdePackages.kwallet-pam
+        buf
+        pkgs.unstable.deskflow
+        # Programming things
+        uv
+        python311
+        python312
+        postman
+        # GCP things
+        google-cloud-sdk
+        k9s
+        kubectl
+        (pkgs.google-cloud-sdk.withExtraComponents [pkgs.google-cloud-sdk.components.gke-gcloud-auth-plugin])
+        #Kde things
+        kdePackages.powerdevil
+        kdePackages.kwallet
+        kdePackages.kwallet-pam
         kdePackages.plasma-browser-integration
         kdePackages.plasma-thunderbolt
    ];
