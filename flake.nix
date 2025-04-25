@@ -16,7 +16,7 @@
     # hardware.url = "github:NixOS/nixos-hardware"; # Optional: For specific hardware presets
   };
 
-  outputs = { self, nixpkgs, home-manager, ... }@inputs:
+  outputs = { self, nixpkgs, home-manager, nixpkgs-unstable, ... }@inputs:
     let
       # Helper function to generate a NixOS configuration
       mkNixosSystem = { system, device, user, extraModules ? [] }:
@@ -52,14 +52,13 @@
             # Add any extra modules specific to this host invocation
           ] ++ extraModules;
         };
-      overlay-unstable = final: prev: {
-        #unstable = nixpkgs-unstable.legacyPackages.${prev.system};
-        unstable = import nixpkgs-unstable {
-           inherit system;
-           config.allowUnfree = true;
-        };
-      };
-
+	 overlay-unstable = final: prev: {
+         unstable = nixpkgs-unstable.legacyPackages.${prev.system};
+         #unstable = import nixpkgs-unstable {
+         #  inherit system;
+         #  config.allowUnfree = true;
+         #};
+       };
     in {
       # Define NixOS configurations for each host
       nixosConfigurations = {
