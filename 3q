@@ -88,8 +88,12 @@
   #  Program configuration
   ##########################
   home-manager.users.${user} = {
-   programs.ssh.enable = true;
-   programs.ssh.knownHosts."desktop".publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMlMp3gOmuiGEjtG7d/c7CIqQpId49EZoX5Nu1J6Pfuo"; 
+   programs.ssh = {
+     enable = true;
+     ssh.knownHosts.desktop = {
+       publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMlMp3gOmuiGEjtG7d/c7CIqQpId49EZoX5Nu1J6Pfuo";
+     };
+   };
    programs.git = {
       # Use lib.mkOverride to ensure these values take precedence over
       # any potential definitions in home.nix or common.nix.
