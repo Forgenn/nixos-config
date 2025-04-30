@@ -40,6 +40,7 @@
     initialHashedPassword = "*"; # Set a password manually or use home-manager/impermanence
     openssh.authorizedKeys.keys = [
       # Add your SSH public key(s) here
+       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMlMp3gOmuiGEjtG7d/c7CIqQpId49EZoX5Nu1J6Pfuo"
     ];
   };
 
@@ -47,7 +48,7 @@
 
   # Firewall settings (example)
   # networking.firewall.enable = true;
-  # networking.firewall.allowedTCPPorts = [ ... ];
+  networking.firewall.allowedTCPPorts = [ 22 ];
   # networking.firewall.allowedUDPPorts = [ ... ];
 
   fonts.packages = with pkgs; [
@@ -69,6 +70,7 @@
         python311
         python312
 	go
+	nodejs_23
         postman
         # GCP things
 	kubernetes-helm
@@ -87,9 +89,9 @@
   ##########################
   #  Program configuration
   ##########################
+  programs.nix-ld.enable = true;
+
   home-manager.users.${user} = {
-   programs.ssh.enable = true;
-   programs.ssh.knownHosts."desktop".publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMlMp3gOmuiGEjtG7d/c7CIqQpId49EZoX5Nu1J6Pfuo"; 
    programs.git = {
       # Use lib.mkOverride to ensure these values take precedence over
       # any potential definitions in home.nix or common.nix.
