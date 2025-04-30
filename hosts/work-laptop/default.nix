@@ -62,13 +62,16 @@
         starship
         slack
         buf
+	pkgs.unstable.openbao
         pkgs.unstable.deskflow
         # Programming things
         uv
         python311
         python312
+	go
         postman
         # GCP things
+	kubernetes-helm
         google-cloud-sdk
         k9s
         kubectl
@@ -102,7 +105,7 @@
       {
         # Use 'exec --no-startup-id' or just 'command' if HM handles exec wrapper
         # Using a direct command string is typical here.
-        command = "${pkgs.xorg.xrandr}/bin/xrandr --output eDP-1 --primary --mode 2560x1600 --pos 3000x824 --rotate normal --scale 1x1 --auto --output DP-10 --mode 1920x1080 --pos 0x0 --rotate left   --scale 1x1 --auto --output DP-9 --mode 1920x1080 --pos 1080x420 --rotate normal --scale 1x1 --auto";
+        command = "exec ${pkgs.xorg.xrandr}/bin/xrandr --output eDP-1 --primary --mode 1920x1200 --pos 3000x824 --rotate normal --scale 0.5x0.5 --filter nearest --auto --output DP-10 --mode 1920x1080 --pos 0x0 --rotate left   --scale 1x1 --auto --output DP-9 --mode 1920x1080 --pos 1080x420 --rotate normal --scale 1x1 --auto";
         # These settings ensure it runs once at startup and not on i3 reload
         always = false;
         notification = false;
@@ -124,7 +127,7 @@
     # e.g., enabling specific work applications or services
 
   
-  #home.homeDirectory = /home/${user};
+ #home.homeDirectory = /home/${user};
 
  };
 }
