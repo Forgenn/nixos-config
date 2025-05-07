@@ -26,7 +26,17 @@
 
           modules = [
 	    # Enable access to unstable packages
-	    ({ config, pkgs, ... }: { nixpkgs.overlays = [ overlay-unstable ]; })
+	    ({ config, pkgs, ... }: { nixpkgs.overlays = 
+					[ 
+					    (final: prev: {
+						    unstable = import nixpkgs-unstable {
+						    inherit (prev) system; # Use system from the pkgs being overlaid
+						    config.allowUnfree = true; # THIS IS THE KEY FOR UNSTABLE
+						  };
+						})
+					];
+					nixpkgs.config.allowUnfree = true;
+				   })
 
             # Import host-specific configuration
             ./hosts/${device}
@@ -52,13 +62,6 @@
             # Add any extra modules specific to this host invocation
           ] ++ extraModules;
         };
-	 overlay-unstable = final: prev: {
-         unstable = nixpkgs-unstable.legacyPackages.${prev.system};
-         #unstable = import nixpkgs-unstable {
-         #  inherit system;
-         #  config.allowUnfree = true;
-         #};
-       };
     in {
       # Define NixOS configurations for each host
       nixosConfigurations = {

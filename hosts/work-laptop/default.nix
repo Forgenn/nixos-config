@@ -63,6 +63,7 @@
         starship
         slack
         buf
+	pkgs.unstable.code-cursor
 	pkgs.unstable.openbao
         pkgs.unstable.deskflow
         # Programming things
@@ -73,6 +74,7 @@
 	nodejs_23
         postman
         # GCP things
+	opentofu
 	kubernetes-helm
         google-cloud-sdk
         k9s

@@ -48,7 +48,8 @@
   ];
 
   # Allow unfree packages if needed (e.g., for drivers, certain apps)
-  nixpkgs.config.allowUnfree = true;
+  #nixpkgs.config.allowUnfree = true;
+  #unstable.config.allowUnfree = true;
 
   # System settings
   system.stateVersion = "24.11"; # Set to the NixOS version you're basing on

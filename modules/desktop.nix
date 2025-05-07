@@ -103,6 +103,9 @@
         background-blur = 40;
         shell-integration = "fish";
         command = "fish";
+	keybind = [
+	  "ctrl+backspace=text:\\x15"
+	];
       }; 
    };
     
