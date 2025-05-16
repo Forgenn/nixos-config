@@ -45,6 +45,8 @@
             { criteria = { class = "(?i)*nextcloud*"; }; command = "floating disable"; }
             { criteria = { class = "plasmashell"; window_type = "notification"; }; command = "border none, move position 70 ppt 81 ppt"; }
             { criteria = { title = "Desktop @ QRect.*"; }; command = "kill, floating enable, border none"; }
+	
+            { criteria = { class = "(?i)task"; }; command = "floating disable"; }
         ];
         #noFocus = [
         #    { criteria = { class = "plasmashell"; window_type = "notification"; }; }

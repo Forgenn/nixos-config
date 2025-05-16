@@ -22,7 +22,11 @@
       mkNixosSystem = { system, device, user, extraModules ? [] }:
         nixpkgs.lib.nixosSystem {
           inherit system;
-          specialArgs = { inherit inputs user; }; # Pass inputs and user info down to modules
+          specialArgs = { inherit inputs user; 
+	     cursorOverlayFile = ./overlays/cursor-overlay.nix;
+	     customOpensshOverlayFile = ./overlays/ssh-no-perm-overlay.nix; # Path to the new SSH overlay
+             opensshDontCheckPermPatch = ./patches/openssh-nix-dont-checkperm.patch; # Path to the patch
+	     }; # Pass inputs and user info down to modules
 
           modules = [
 	    # Enable access to unstable packages

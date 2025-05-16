@@ -1,5 +1,5 @@
 # hosts/laptop/default.nix
-{ config, pkgs, lib, inputs, user, ... }: # Note the 'user' arg passed from flake.nix
+{ config, pkgs, lib, inputs, user, cursorOverlayFile, customOpensshOverlayFile, opensshDontCheckPermPatch, ... }: # Note the 'user' arg passed from flake.nix
 
 {
   imports = [
@@ -55,6 +55,28 @@
     fira-code
     fira-code-symbols
   ];
+  
+    nixpkgs.overlays = [
+    (
+      (import customOpensshOverlayFile {
+        inherit pkgs lib; # pkgs here is the set *before* this specific overlay is fully applied by Nix
+        patchFile = opensshDontCheckPermPatch;
+      })
+    )
+    # Your inline overlay for Cursor
+    (
+      # Call the outer function of the overlay, passing pkgs and lib
+      (import cursorOverlayFile { inherit pkgs lib; }) # Adjust path if needed
+      # Call the inner function with your specific Cursor details
+      {
+        newCursorVersion = "0.50.4";
+        newCursorUrl = "https://downloads.cursor.com/production/8ea935e79a50a02da912a034bbeda84a6d3d355d/linux/x64/Cursor-0.50.4-x86_64.AppImage";
+        # Replace with the actual SHA256 hash after the first failed build
+        newCursorSha256 = "sha256-ik+2TqmRhnzXM+qoCQ+KLQkW/cqZSqcZS2P2yuUPGI8=";
+        # cursorPname = "code-cursor"; # Optional, defaults to "code-cursor" in the overlay file
+      }
+    ) #You can add other overlays here if needed
+  ];
   # Laptop specific packages (less common, prefer home-manager)
    environment.systemPackages = with pkgs; [ 
         pkgs.chromium
@@ -63,7 +85,8 @@
         starship
         slack
         buf
-	pkgs.unstable.code-cursor
+	#overlay
+	code-cursor
 	pkgs.unstable.openbao
         pkgs.unstable.deskflow
         # Programming things
@@ -73,6 +96,8 @@
 	go
 	nodejs_23
         postman
+	jq
+	bambu-studio
         # GCP things
 	opentofu
 	kubernetes-helm
@@ -120,12 +145,12 @@
             { output = "eDP-1"; workspace = "1"; }
             { output = "eDP-1"; workspace = "2"; }
             { output = "eDP-1"; workspace = "3"; }
-            { output = "DP-7"; workspace = "4"; }
-            { output = "DP-7"; workspace = "5"; }
-            { output = "DP-7"; workspace = "6"; }
-            { output = "DP-8"; workspace = "7"; }
-            { output = "DP-8"; workspace = "8"; }
-            { output = "DP-8"; workspace = "9"; }
+            { output = "DP-8"; workspace = "4"; }
+            { output = "DP-8"; workspace = "5"; }
+            { output = "DP-8"; workspace = "6"; }
+            { output = "DP-7"; workspace = "7"; }
+            { output = "DP-7"; workspace = "8"; }
+            { output = "DP-7"; workspace = "9"; }
      ];
 
     # Add other work-laptop-specific HM settings for 'ntb' here if needed
