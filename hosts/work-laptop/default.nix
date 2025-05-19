@@ -47,8 +47,8 @@
   security.sudo.wheelNeedsPassword = true; # Or true if you prefer
 
   # Firewall settings (example)
-  # networking.firewall.enable = true;
-  networking.firewall.allowedTCPPorts = [ 22 ];
+  networking.firewall.enable = false;
+  #networking.firewall.allowedTCPPorts = [ 22, 47 ];
   # networking.firewall.allowedUDPPorts = [ ... ];
 
   fonts.packages = with pkgs; [
@@ -88,7 +88,9 @@
 	#overlay
 	code-cursor
 	pkgs.unstable.openbao
+	# Home integrations
         pkgs.unstable.deskflow
+	sunshine
         # Programming things
         uv
         python311
@@ -118,6 +120,8 @@
   ##########################
   programs.nix-ld.enable = true;
 
+  services.openssh.settings.X11Forwarding = true;
+  
   home-manager.users.${user} = {
    programs.git = {
       # Use lib.mkOverride to ensure these values take precedence over
