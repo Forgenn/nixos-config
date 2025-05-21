@@ -102,6 +102,11 @@
       enable = true;
       userName = lib.mkOverride 10 "ntb";
       userEmail = lib.mkOverride 10 "ipolmonxammar@gmail.com";
+      extraConfig = {
+        "safe" = {
+          directory = "/etc/nixos";
+        };
+      };
     };
   };
 

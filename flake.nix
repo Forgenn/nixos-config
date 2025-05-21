@@ -87,6 +87,14 @@
           isCluster = true;
           clusterNode = "cuno";
         };
+
+        katsuragi = mkNixosSystem {
+          system = "x86_64-linux";
+          device = "revachol-cluster";
+          user = "ntb";
+          isCluster = true;
+          clusterNode = "katsuragi";
+        };
       };
 
       # homeConfigurations = {
