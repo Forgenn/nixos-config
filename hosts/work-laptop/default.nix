@@ -3,9 +3,8 @@
 
 {
   imports = [
-    # Include the hardware configuration specific to this laptop
     ./hardware-configuration.nix
-    # You could import other laptop-specific modules here
+    ../common.nix
   ];
 
   # Hostname
@@ -85,24 +84,24 @@
         starship
         slack
         buf
-	#overlay
-	code-cursor
-	pkgs.unstable.openbao
-	# Home integrations
+        #overlay
+        code-cursor
+        pkgs.unstable.openbao
+        # Home integrations
         pkgs.unstable.deskflow
-	sunshine
+        sunshine
         # Programming things
         uv
         python311
         python312
-	go
-	nodejs_23
+        go
+        nodejs_23
         postman
-	jq
-	bambu-studio
+        jq
+        bambu-studio
         # GCP things
-	opentofu
-	kubernetes-helm
+        opentofu
+        kubernetes-helm
         google-cloud-sdk
         k9s
         kubectl
@@ -118,7 +117,33 @@
   ##########################
   #  Program configuration
   ##########################
+  # Make vscode/cursor ssh work
   programs.nix-ld.enable = true;
+
+  programs.ssh = {
+   enable = true;
+   # Impure Identity file config? Throws purity error if not a literal
+   extraConfig = ''
+        Host github.com
+           AddKeysToAgent yes
+           Hostname github.com
+           IdentitiesOnly yes
+           IdentityFile  ~/.ssh/id_ed25519_ais
+
+        Host p.github.com
+           AddKeysToAgent no
+           Hostname github.com
+           IdentitiesOnly yes
+           IdentityFile  ~/.ssh/id_ed25519
+        
+        Host gitlab.com
+                AddKeysToAgent yes
+                Hostname gitlab.com
+                IdentitiesOnly yes
+                IdentityFile  ~/.ssh/id_ed25519
+
+    '';
+   };
 
   services.openssh.settings.X11Forwarding = true;
   
@@ -156,12 +181,5 @@
             { output = "DP-7"; workspace = "8"; }
             { output = "DP-7"; workspace = "9"; }
      ];
-
-    # Add other work-laptop-specific HM settings for 'ntb' here if needed
-    # e.g., enabling specific work applications or services
-
-  
- #home.homeDirectory = /home/${user};
-
  };
 }
