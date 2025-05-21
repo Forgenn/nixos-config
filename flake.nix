@@ -79,6 +79,14 @@
           isCluster = true;
           clusterNode = "dubois";
         };
+
+        cuno = mkNixosSystem {
+          system = "x86_64-linux";
+          device = "revachol-cluster";
+          user = "ntb";
+          isCluster = true;
+          clusterNode = "cuno";
+        };
       };
 
       # homeConfigurations = {
