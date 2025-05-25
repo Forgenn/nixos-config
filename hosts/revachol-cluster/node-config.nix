@@ -22,6 +22,6 @@ in
     # Management AND node
     role = "agent";
     tokenFile = ../secrets/k3s_token.age;
-    serverAddr = "${kubeMasterHostname}:${kubeMasterAPIServerPort}";
+    serverAddr = "${kubeMasterHostname}:builtins.toString ${kubeMasterAPIServerPort}";
   };
 }
