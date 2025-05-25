@@ -20,8 +20,8 @@ in
   services.k3s = {
     enable = true;
     # Management AND node
-    role = "server";
+    role = "agent";
     tokenFile = ../secrets/k3s_token.age;
-    clusterInit = true;
+    serverAddr = "${kubeMasterHostname}:${kubeMasterAPIServerPort}"
   };
 }
