@@ -21,7 +21,7 @@ in
     enable = true;
     # Management AND node
     role = "agent";
-    tokenFile = ../secrets/k3s_token.age;
+    tokenFile = ./secrets/k3s_token.age;
     serverAddr = kubeMasterHostname + ":" + (builtins.toString kubeMasterAPIServerPort);
   };
 }
