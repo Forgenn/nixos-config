@@ -1,7 +1,3 @@
-# Edit this configuration file to define what should be installed on
-# your system.  Help is available in the configuration.nix(5) man page
-# and in the NixOS manual (accessible by running 'nixos-help').
-
 { config, pkgs, lib, inputs, user, ... }:
 
 {
@@ -25,7 +21,16 @@
 
   # Common networking settings
   networking.firewall.enable = true;
-  networking.firewall.allowedTCPPorts = [ 22 ];  # SSH
+  networking.firewall.allowedTCPPorts = [
+    22
+    6443 # k3s: kube api server
+    2379 # k3s, etcd clients
+    2380 # k3s, etcd peers
+  ];
+
+  networking.firewall.allowedUDPPorts = [
+    8472 # k3s, flannel
+  ];
 
   # Enable agenix
   age = {
@@ -35,6 +40,13 @@
 
   age.secrets.node_key = {
     file = ./secrets/node_key.age;
+    mode = "600";
+    owner = "ntb";
+    group = "users";
+  };
+
+  age.secrets.k3s_token = {
+    file = ./secrets/k3s_token.age;
     mode = "600";
     owner = "ntb";
     group = "users";

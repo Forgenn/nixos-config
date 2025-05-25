@@ -4,11 +4,11 @@
 
   inputs = {
     # Nixpkgs (stable or unstable, choose one)
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.11"; # Or nixos-23.11, etc.
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05"; # Or nixos-23.11, etc.
     nixpkgs-unstable.url = "nixpkgs/nixos-unstable";
     # Home Manager
     home-manager = {
-      url = "github:nix-community/home-manager/release-24.11";
+      url = "github:nix-community/home-manager/release-25.05";
       inputs.nixpkgs.follows = "nixpkgs"; # Ensures HM uses the same nixpkgs
     };
 

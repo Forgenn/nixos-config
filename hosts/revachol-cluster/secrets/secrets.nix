@@ -20,6 +20,6 @@ in
 
   # Secret definitions
   "node_key.age".publicKeys = allKeys;
-  #"secret2.age".publicKeys = users ++ systems;
+  "k3s_token.age".publicKeys = allKeys;
   # Add more secrets here, reusing allNodeKeys, allNodeAndUserKeys, or subsets as needed
 }
