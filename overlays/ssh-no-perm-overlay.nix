@@ -11,7 +11,7 @@ self: super: { # self is the final pkgs, super is the previous pkgs
     # Create a distinct package name by appending a suffix
     pname = "${oldAttrs.pname or "openssh"}-no-checkperm";
     # Version remains the same as the base openssh package
-    version = oldAttrs.version;
+    #version = oldAttrs.version;
 
     patches = (oldAttrs.patches or []) ++ [
       patchFile # Apply the provided patch

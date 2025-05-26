@@ -73,10 +73,10 @@
       (import cursorOverlayFile { inherit pkgs lib; }) # Adjust path if needed
       # Call the inner function with your specific Cursor details
       {
-        newCursorVersion = "0.50.5";
-        newCursorUrl = "https://downloads.cursor.com/production/96e5b01ca25f8fbd4c4c10bc69b15f6228c80771/linux/x64/Cursor-0.50.5-x86_64.AppImage";
+        newCursorVersion = "0.50.7";
+        newCursorUrl = "https://downloads.cursor.com/production/02270c8441bdc4b2fdbc30e6f470a589ec78d60d/linux/x64/Cursor-0.50.7-x86_64.AppImage";
         # Replace with the actual SHA256 hash after the first failed build
-        newCursorSha256 = "DUWIgQYD3Wj6hF7NBb00OGRynKmXcFldWFUA6W8CZeM=";
+        newCursorSha256 = "ukYsLtwnM+yjeDX24Bls7c0MhxeMGOemdQFF6t8Mqvg=";
         # cursorPname = "code-cursor"; # Optional, defaults to "code-cursor" in the overlay file
       }
     ) #You can add other overlays here if needed
@@ -97,9 +97,10 @@
         sunshine
         # Programming things
         uv
-        python311
         python312
-        go
+	python313
+        mypy
+	go
         nodejs_24
         postman
         jq

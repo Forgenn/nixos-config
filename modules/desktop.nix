@@ -142,7 +142,7 @@
   services.desktopManager.plasma6.enable = true;
 
   # Configure sound server
-  hardware.pulseaudio.enable = false; # Use pipewire
+  services.pulseaudio.enable = false; # Use pipewire
   security.rtkit.enable = true;
   services.pipewire = {
     enable = true;
