@@ -13,8 +13,10 @@
   networking.wireless.iwd.enable = true;
   networking.networkmanager.wifi.backend = "iwd";
   # Laptop specific settings
- 
- 
+ # services.avahi.enable = true; 
+ # services.avahi.publish.enable = true;
+ # services.avahi.publish.userServices = true; 
+  
   boot.kernelPackages = pkgs.linuxPackages_latest;
 
   # Enable bluetooth
@@ -35,7 +37,7 @@
   users.users.${user} = {
     isNormalUser = true;
     description = "ntb";
-    extraGroups = [ "docker" "networkmanager" "wheel" "video" "audio" ]; # 'wheel' for sudo access
+    extraGroups = [ "docker" "networkmanager" "wheel" "video" "audio"]; # 'wheel' for sudo access
     initialHashedPassword = "*"; # Set a password manually or use home-manager/impermanence
     openssh.authorizedKeys.keys = [
       # Add your SSH public key(s) here
@@ -46,7 +48,10 @@
   security.sudo.wheelNeedsPassword = true; # Or true if you prefer
 
   # Firewall settings (example)
-  networking.firewall.enable = false;
+  networking.firewall = {
+    enable = true;
+    allowedTCPPorts = [ 22 ]; 
+  };
   #networking.firewall.allowedTCPPorts = [ 22, 47 ];
   # networking.firewall.allowedUDPPorts = [ ... ];
 
@@ -68,10 +73,10 @@
       (import cursorOverlayFile { inherit pkgs lib; }) # Adjust path if needed
       # Call the inner function with your specific Cursor details
       {
-        newCursorVersion = "0.50.4";
-        newCursorUrl = "https://downloads.cursor.com/production/8ea935e79a50a02da912a034bbeda84a6d3d355d/linux/x64/Cursor-0.50.4-x86_64.AppImage";
+        newCursorVersion = "0.50.5";
+        newCursorUrl = "https://downloads.cursor.com/production/96e5b01ca25f8fbd4c4c10bc69b15f6228c80771/linux/x64/Cursor-0.50.5-x86_64.AppImage";
         # Replace with the actual SHA256 hash after the first failed build
-        newCursorSha256 = "sha256-ik+2TqmRhnzXM+qoCQ+KLQkW/cqZSqcZS2P2yuUPGI8=";
+        newCursorSha256 = "DUWIgQYD3Wj6hF7NBb00OGRynKmXcFldWFUA6W8CZeM=";
         # cursorPname = "code-cursor"; # Optional, defaults to "code-cursor" in the overlay file
       }
     ) #You can add other overlays here if needed
@@ -95,7 +100,7 @@
         python311
         python312
         go
-        nodejs_23
+        nodejs_24
         postman
         jq
         bambu-studio
@@ -117,8 +122,27 @@
   ##########################
   #  Program configuration
   ##########################
-  # Make vscode/cursor ssh work
+  security.wrappers.sunshine = {
+      owner = "root";
+      group = "root";
+      capabilities = "cap_sys_admin+p";
+      source = "${pkgs.sunshine}/bin/sunshine";
+  };
+  services.sunshine = {
+    enable = true;
+    settings = {
+      key_rightalt_to_key_win = "enabled";
+   };
+    autoStart = false;
+    openFirewall = true;
+  };
+  
   programs.nix-ld.enable = true;
+
+  services.openssh.settings.X11Forwarding = true;
+  
+  home-manager.users.${user} = {
+
 
   programs.ssh = {
    enable = true;
@@ -141,13 +165,15 @@
                 Hostname gitlab.com
                 IdentitiesOnly yes
                 IdentityFile  ~/.ssh/id_ed25519
+          
+        Host bitbucket.org
+                AddKeysToAgent yes
+                Hostname bitbucket.org
+                IdentitiesOnly yes
+                IdentityFile  ~/.ssh/id_ed25519
 
     '';
    };
-
-  services.openssh.settings.X11Forwarding = true;
-  
-  home-manager.users.${user} = {
    programs.git = {
       # Use lib.mkOverride to ensure these values take precedence over
       # any potential definitions in home.nix or common.nix.
