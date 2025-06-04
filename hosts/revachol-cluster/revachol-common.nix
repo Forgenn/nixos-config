@@ -2,7 +2,10 @@
   config,
   pkgs,
   lib,
+<<<<<<< Updated upstream
   inputs,
+=======
+>>>>>>> Stashed changes
   user,
   ...
 }:
@@ -83,7 +86,11 @@
     openssh.authorizedKeys.keys = [
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMlMp3gOmuiGEjtG7d/c7CIqQpId49EZoX5Nu1J6Pfuo"
     ];
+<<<<<<< Updated upstream
     packages = with pkgs; [ ];
+=======
+    #packages = with pkgs; [ ];
+>>>>>>> Stashed changes
   };
 
   nixpkgs.config.allowUnfree = true;
@@ -96,6 +103,12 @@
     tmux
     tcpdump
     age
+<<<<<<< Updated upstream
+=======
+    nixd
+    nixfmt-rfc-style
+    kubernetes-helm
+>>>>>>> Stashed changes
     (pkgs.callPackage "${
       builtins.fetchTarball {
         url = "https://github.com/ryantm/agenix/archive/main.tar.gz";
