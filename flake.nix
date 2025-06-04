@@ -16,56 +16,78 @@
     # hardware.url = "github:NixOS/nixos-hardware"; # Optional: For specific hardware presets
   };
 
-  outputs = { self, nixpkgs, home-manager, nixpkgs-unstable, ... }@inputs:
+  outputs =
+    {
+      self,
+      nixpkgs,
+      home-manager,
+      nixpkgs-unstable,
+      ...
+    }@inputs:
     let
       # Helper function to generate a NixOS configuration
-      mkNixosSystem = { system, device, user, extraModules ? [], isCluster ? false, clusterNode ? null }:
+      mkNixosSystem =
+        {
+          system,
+          device,
+          user,
+          extraModules ? [ ],
+          isCluster ? false,
+          clusterNode ? null,
+        }:
         nixpkgs.lib.nixosSystem {
           inherit system;
-          specialArgs = { inherit inputs user; 
-	     cursorOverlayFile = ./overlays/cursor-overlay.nix;
-	     customOpensshOverlayFile = ./overlays/ssh-no-perm-overlay.nix;
-             opensshDontCheckPermPatch = ./patches/openssh-nix-dont-checkperm.patch;
-	     };
+          specialArgs = {
+            inherit inputs user;
+            cursorOverlayFile = ./overlays/cursor-overlay.nix;
+            customOpensshOverlayFile = ./overlays/ssh-no-perm-overlay.nix;
+            opensshDontCheckPermPatch = ./patches/openssh-nix-dont-checkperm.patch;
+          };
 
-      modules = [
-	    # Enable access to unstable packages
-        ({ config, pkgs, ... }: { nixpkgs.overlays = 
-            [ 
-                (final: prev: {
-                  unstable = import nixpkgs-unstable {
-                  inherit (prev) system;
-                  config.allowUnfree = true;
-                };
-              })
-            ];
-            nixpkgs.config.allowUnfree = true;
-            })
+          modules = [
+            # Enable access to unstable packages
+            (
+              { config, pkgs, ... }:
+              {
+                nixpkgs.overlays = [
+                  (final: prev: {
+                    unstable = import nixpkgs-unstable {
+                      inherit (prev) system;
+                      config.allowUnfree = true;
+                    };
+                  })
+                ];
+                nixpkgs.config.allowUnfree = true;
+              }
+            )
 
-              # Import host-specific configuration
-              (if isCluster then
+            # Import host-specific configuration
+            (
+              if isCluster then
                 assert clusterNode != null;
                 ./hosts/${device}/${clusterNode}/default.nix
               else
-                ./hosts/${device})
-              
-              # Import Home Manager NixOS module
-              home-manager.nixosModules.home-manager
-              {
-                home-manager.useGlobalPkgs = true;
-                home-manager.useUserPackages = true;
-                home-manager.users.${user} = import ./home-manager/${user}/home.nix;
-                home-manager.extraSpecialArgs = { inherit inputs user; };
-              }
-            ] ++ extraModules;
-          };
-    in {
+                ./hosts/${device}
+            )
+
+            # Import Home Manager NixOS module
+            home-manager.nixosModules.home-manager
+            {
+              home-manager.useGlobalPkgs = true;
+              home-manager.useUserPackages = true;
+              home-manager.users.${user} = import ./home-manager/${user}/home.nix;
+              home-manager.extraSpecialArgs = { inherit inputs user; };
+            }
+          ] ++ extraModules;
+        };
+    in
+    {
       # Define NixOS configurations for each host
       nixosConfigurations = {
         work-laptop = mkNixosSystem {
           system = "x86_64-linux";
-	        device = "work-laptop";          
-	        user = "ntb";
+          device = "work-laptop";
+          user = "ntb";
           extraModules = [ ./modules/desktop.nix ];
         };
 

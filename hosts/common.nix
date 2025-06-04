@@ -1,6 +1,12 @@
 # hosts/common.nix
 # Settings applied to ALL hosts defined in flake.nix
-{ config, pkgs, lib, inputs, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  inputs,
+  ...
+}:
 
 {
   imports = [
@@ -11,7 +17,7 @@
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
   networking.useDHCP = lib.mkDefault true;
-  
+
   time.timeZone = "Europe/Madrid";
   i18n.defaultLocale = "en_US.UTF-8";
 
@@ -31,7 +37,8 @@
       experimental-features = nix-command flakes
     '';
     settings.auto-optimise-store = true;
-    gc = { # Automatic garbage collection
+    gc = {
+      # Automatic garbage collection
       automatic = true;
       dates = "weekly";
       options = "--delete-older-than 7d";

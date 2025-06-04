@@ -1,4 +1,11 @@
-{ config, pkgs, lib, inputs, user, ... }: 
+{
+  config,
+  pkgs,
+  lib,
+  inputs,
+  user,
+  ...
+}:
 
 {
   imports = [
@@ -15,6 +22,6 @@
   programs.fish = {
     enable = true;
   };
-  
+
   home.stateVersion = "24.11";
 }

@@ -1,11 +1,17 @@
 # modules/desktop.nix
 # Example module for desktop-specific settings, imported by laptop config
-{ config, pkgs, lib, user, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  user,
+  ...
+}:
 
-{ 
+{
   # Enable the X11 windowing system.
   services.xserver.enable = true;
-  
+
   services.xserver.windowManager.i3 = {
     enable = true;
     extraPackages = with pkgs; [
@@ -26,11 +32,11 @@
       };
       blur-background = true;
     };
-   };
-  
+  };
+
   # hm configuration
   home-manager.users.${user} = {
-	
+
     imports = [
       ../home-manager/modules/i3.nix
     ];
@@ -103,37 +109,37 @@
         background-blur = 40;
         shell-integration = "fish";
         command = "fish";
-	keybind = [
-	  "ctrl+backspace=text:\\x15"
-	];
-      }; 
-   };
-    
-    programs.rofi.enable = true; 
+        keybind = [
+          "ctrl+backspace=text:\\x15"
+        ];
+      };
+    };
+
+    programs.rofi.enable = true;
     programs.rofi.theme = "solarized_alternate.rasi";
   };
-  
+
   services.displayManager.defaultSession = "plasma6-i3wm+i3";
   # Setup desktop services
   services.xserver.displayManager = {
-     session = [
-         {
-             manage = "desktop";
-             name = "plasma6-i3wm";
-             start = ''exec env KDEWM=${pkgs.i3-gaps}/bin/i3 ${pkgs.kdePackages.plasma-workspace}/bin/startplasma-x11'';
-         }
-         #{
-         #    manage = "desktop";
-         #    name = "i3";
-         #    start = ''exec ${pkgs.i3-gaps}/bin/i3'';
-         #}
-         #{
-         #    manage = "desktop";
-         #    name = "plasma6";
-         #    start = ''exec ${pkgs.plasma-workspace}/bin/startplasma-x11'';
-         #}
-     ];
- };
+    session = [
+      {
+        manage = "desktop";
+        name = "plasma6-i3wm";
+        start = ''exec env KDEWM=${pkgs.i3-gaps}/bin/i3 ${pkgs.kdePackages.plasma-workspace}/bin/startplasma-x11'';
+      }
+      #{
+      #    manage = "desktop";
+      #    name = "i3";
+      #    start = ''exec ${pkgs.i3-gaps}/bin/i3'';
+      #}
+      #{
+      #    manage = "desktop";
+      #    name = "plasma6";
+      #    start = ''exec ${pkgs.plasma-workspace}/bin/startplasma-x11'';
+      #}
+    ];
+  };
   # Disable plasma kwin window manager
   systemd.user.services.plasma-kwin_x11.enable = false;
 
@@ -155,6 +161,6 @@
   # Add some common desktop packages
   environment.systemPackages = with pkgs; [
     kdePackages.knewstuff
-    kdePackages.kscreen 
+    kdePackages.kscreen
   ];
 }

@@ -1,4 +1,9 @@
-{ config, pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 
 {
   programs.ssh = {
@@ -15,7 +20,7 @@
          Hostname github.com
          IdentitiesOnly yes
          IdentityFile  ~/.ssh/id_ed25519
-      
+
       Host gitlab.com
               AddKeysToAgent yes
               Hostname gitlab.com
@@ -23,4 +28,4 @@
               IdentityFile  ~/.ssh/id_ed25519
     '';
   };
-} 
+}

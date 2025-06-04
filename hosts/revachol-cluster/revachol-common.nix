@@ -1,14 +1,21 @@
-{ config, pkgs, lib, inputs, user, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  inputs,
+  user,
+  ...
+}:
 
 {
-  imports =
-    [
-      "${builtins.fetchTarball {
+  imports = [
+    "${
+      builtins.fetchTarball {
         url = "https://github.com/ryantm/agenix/archive/main.tar.gz";
         sha256 = "0ngkhf7qamibhbl9z1dryzscd36y4fz1m1h6fb2z6fylw0b8029p";
-      }}/modules/age.nix"
-    ];
-
+      }
+    }/modules/age.nix"
+  ];
 
   # Locale configuration
   i18n = {
@@ -62,19 +69,21 @@
 
   # Set your time zone.
   time.timeZone = "Europe/Madrid";
-  
 
   # Configure console keymap
   console.keyMap = "uk";
-  
+
   users.users.${user} = {
     isNormalUser = true;
     description = "Cluster User";
-    extraGroups = [ "wheel" "docker" ];
+    extraGroups = [
+      "wheel"
+      "docker"
+    ];
     openssh.authorizedKeys.keys = [
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMlMp3gOmuiGEjtG7d/c7CIqQpId49EZoX5Nu1J6Pfuo"
     ];
-    packages = with pkgs; []; 
+    packages = with pkgs; [ ];
   };
 
   nixpkgs.config.allowUnfree = true;
@@ -87,10 +96,12 @@
     tmux
     tcpdump
     age
-    (pkgs.callPackage "${builtins.fetchTarball {
-      url = "https://github.com/ryantm/agenix/archive/main.tar.gz";
-      sha256 = "0ngkhf7qamibhbl9z1dryzscd36y4fz1m1h6fb2z6fylw0b8029p";
-    }}/pkgs/agenix.nix" {})
+    (pkgs.callPackage "${
+      builtins.fetchTarball {
+        url = "https://github.com/ryantm/agenix/archive/main.tar.gz";
+        sha256 = "0ngkhf7qamibhbl9z1dryzscd36y4fz1m1h6fb2z6fylw0b8029p";
+      }
+    }/pkgs/agenix.nix" { })
   ];
 
   # Enable the OpenSSH daemon.
@@ -110,7 +121,7 @@
   };
 
   home-manager.users.${user} = {
-   programs.git = {
+    programs.git = {
       enable = true;
       userName = lib.mkOverride 10 "ntb";
       userEmail = lib.mkOverride 10 "ipolmonxammar@gmail.com";
