@@ -58,6 +58,13 @@
     group = "users";
   };
 
+  age.secrets.nas_node_key = {
+    file = ./secrets/nas_node_key.age;
+    mode = "600";
+    owner = "ntb";
+    group = "users";
+  };
+
   programs.nix-ld.enable = true;
   # Bootloader.
   boot.loader.systemd-boot.enable = true;

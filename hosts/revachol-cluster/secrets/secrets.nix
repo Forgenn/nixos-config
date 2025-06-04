@@ -28,5 +28,6 @@ in
   # Secret definitions
   "github_node_key.age".publicKeys = allKeys;
   "k3s_token.age".publicKeys = allKeys;
+  "nas_node_key.age".publicKeys = allKeys;
   # Add more secrets here, reusing allNodeKeys, allNodeAndUserKeys, or subsets as needed
 }
