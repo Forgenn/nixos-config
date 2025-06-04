@@ -36,7 +36,6 @@
   services.openssh.settings.X11Forwarding = true;
 
   home-manager.users.${user} = {
-
     programs.ssh = {
       enable = true;
       # Impure Identity file config? Throws purity error if not a literal
