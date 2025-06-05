@@ -121,6 +121,7 @@
            AddKeysToAgent no
            Hostname github.com
            IdentitiesOnly no
+           IdentityAgent none
            IdentityFile  ~/.ssh/id_ed25519
 
         Host gitlab.com
