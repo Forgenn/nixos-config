@@ -59,15 +59,30 @@
     programs.vscode = {
       enable = true;
       package = pkgs.code-cursor;
+      #mutableExtensionsDir = true;
       profiles.default = {
         userSettings = {
           "editor.cursorBlinking" = "smooth";
           "files.autoSave" = "afterDelay";
           "files.autoSaveDelay" = 1000;
           "window.commandCenter" = true;
-          "workbench.colorTheme" = "Cursor Dark High Contrast";
+          #"workbench.colorTheme" = "SynthWave '84";
+          #"workbench.colorTheme" = "Monokai Pro (Filter Spectrum)";
+          "workbench.colorTheme" = "Tokyo Night Storm";
           "workbench.tree.indent" = 24;
-
+          "git.autofetch" = true;
+          "vs-kubernetes" = {
+            "vs-kubernetes.crd-code-completion" = "enabled";
+          };
+          "terminal.external.linuxExec" = "ghostty";
+          "terminal.integrated.defaultProfile.linux" = "fish";
+          "editor.fontFamily" = "'Fira Code Symbol'";
+          "editor.inlayHints.fontFamily" = "Fira Code SymbolSymbol";
+          "editor.codeLensFontFamily" = "Fira Code Symbol";
+          "editor.inlineSuggest.fontFamily" = "Fira Code";
+          "terminal.integrated.fontFamily" = "'Fira Code', 'Fira Code Symbol'";
+          "docker.extension.experimental.composeCompletions" = true;
+          "workbench.activityBar.orientation" = "vertical";
         };
 
         extensions = with pkgs.vscode-extensions; [
@@ -76,9 +91,11 @@
           redhat.vscode-yaml
           charliermarsh.ruff
           ms-python.python
-          eamodio.gitlens
           jnoortheen.nix-ide
           vscodevim.vim
+          enkia.tokyo-night
+          # Unavaible nixos, install
+          #monokai.theme-monokai-pro-vscode
         ];
       };
     };
@@ -92,31 +109,31 @@
 
     programs.ssh = {
       enable = true;
-      #addKeysToAgent = "yes";
+      addKeysToAgent = "yes";
       extraConfig = ''
-        AddKeysToAgent yes
 
         Host github.com
            Hostname github.com
+           AddKeysToAgent yes
            IdentityFile  ~/.ssh/id_ed25519_ais
 
         Host p.github.com
-           AddKeysToAgent yes
+           AddKeysToAgent no
            Hostname github.com
            IdentitiesOnly no
            IdentityFile  ~/.ssh/id_ed25519
 
         Host gitlab.com
-                AddKeysToAgent yes
-                Hostname gitlab.com
-                IdentitiesOnly yes
-                IdentityFile  ~/.ssh/id_ed25519
+          AddKeysToAgent yes
+          Hostname gitlab.com
+          IdentitiesOnly yes
+          IdentityFile  ~/.ssh/id_ed25519_ais
           
         Host bitbucket.org
-                AddKeysToAgent yes
-                Hostname bitbucket.org
-                IdentitiesOnly yes
-                IdentityFile  ~/.ssh/id_ed25519
+          AddKeysToAgent yes
+          Hostname bitbucket.org
+          IdentitiesOnly yes
+          IdentityFile  ~/.ssh/id_ed25519_ais
       '';
     };
     ########################################################################
