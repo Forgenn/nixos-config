@@ -8,6 +8,10 @@
   ##########################
   #  Program configuration
   ##########################
+
+  ########################################################################
+  # --- Sunshine config ---
+  ########################################################################
   security.wrappers.sunshine = {
     owner = "root";
     group = "root";
@@ -24,9 +28,14 @@
     openFirewall = true;
   };
 
+  ########################################################################
+  # --- KDE config ---
+  ########################################################################
   programs.kdeconnect.enable = true;
 
-  ## CHROMIUM
+  ########################################################################
+  # --- Chromium config ---
+  ########################################################################
   programs.chromium = {
     enable = true;
     enablePlasmaBrowserIntegration = true;
@@ -35,6 +44,13 @@
 
   services.openssh.settings.X11Forwarding = true;
 
+  programs.ssh = {
+    startAgent = lib.mkOverride 10 true;
+  };
+
+  ########################################################################
+  # --- Home-manager config ---
+  ########################################################################
   home-manager.users.${user} = {
 
     ########################################################################
@@ -70,20 +86,24 @@
     ########################################################################
     # --- SSH config ---
     ########################################################################
+    services.ssh-agent = {
+      enable = true;
+    };
+
     programs.ssh = {
       enable = true;
-      # Impure Identity file config? Throws purity error if not a literal
+      #addKeysToAgent = "yes";
       extraConfig = ''
+        AddKeysToAgent yes
+
         Host github.com
-           AddKeysToAgent yes
            Hostname github.com
-           IdentitiesOnly yes
            IdentityFile  ~/.ssh/id_ed25519_ais
 
         Host p.github.com
-           AddKeysToAgent no
+           AddKeysToAgent yes
            Hostname github.com
-           IdentitiesOnly yes
+           IdentitiesOnly no
            IdentityFile  ~/.ssh/id_ed25519
 
         Host gitlab.com
@@ -97,7 +117,6 @@
                 Hostname bitbucket.org
                 IdentitiesOnly yes
                 IdentityFile  ~/.ssh/id_ed25519
-
       '';
     };
     ########################################################################
