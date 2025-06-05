@@ -36,6 +36,40 @@
   services.openssh.settings.X11Forwarding = true;
 
   home-manager.users.${user} = {
+
+    ########################################################################
+    # --- Cursor config ---
+    ########################################################################
+    programs.vscode = {
+      enable = true;
+      package = pkgs.code-cursor;
+      profiles.default = {
+        userSettings = {
+          "editor.cursorBlinking" = "smooth";
+          "files.autoSave" = "afterDelay";
+          "files.autoSaveDelay" = 1000;
+          "window.commandCenter" = true;
+          "workbench.colorTheme" = "Cursor Dark High Contrast";
+          "workbench.tree.indent" = 24;
+
+        };
+
+        extensions = with pkgs.vscode-extensions; [
+          golang.go
+          matangover.mypy
+          redhat.vscode-yaml
+          charliermarsh.ruff
+          ms-python.python
+          eamodio.gitlens
+          jnoortheen.nix-ide
+          vscodevim.vim
+        ];
+      };
+    };
+
+    ########################################################################
+    # --- SSH config ---
+    ########################################################################
     programs.ssh = {
       enable = true;
       # Impure Identity file config? Throws purity error if not a literal
@@ -66,6 +100,9 @@
 
       '';
     };
+    ########################################################################
+    # --- Git config ---
+    ########################################################################
     programs.git = {
       # Use lib.mkOverride to ensure these values take precedence over
       # any potential definitions in home.nix or common.nix.
@@ -73,11 +110,11 @@
       userName = lib.mkOverride 10 "ntb";
       userEmail = lib.mkOverride 10 "pol.monedero@aistechspace.com";
     };
-
+    ########################################################################
     # --- Configure i3 Startup for Work Laptop Display Layout ---
+    ########################################################################
     # Define host-specific i3 startup commands here.
     # These will be MERGED with the startup items defined in home-manager/modules/i3.nix
-    # thanks to the Nix/Home Manager module system's list merging.
     xsession.windowManager.i3.config.startup = lib.mkAfter [
       {
         # Use 'exec --no-startup-id' or just 'command' if HM handles exec wrapper
