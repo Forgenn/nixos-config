@@ -10,6 +10,7 @@
 {
   imports = [
     ./../common.nix
+    ../modules/cursor.nix
   ];
   home.homeDirectory = "/home/${user}";
   # User-specific packages

@@ -54,53 +54,6 @@
   home-manager.users.${user} = {
 
     ########################################################################
-    # --- Cursor config ---
-    ########################################################################
-    programs.vscode = {
-      enable = true;
-      package = pkgs.code-cursor;
-      #mutableExtensionsDir = true;
-      profiles.default = {
-        userSettings = {
-          "editor.cursorBlinking" = "smooth";
-          "files.autoSave" = "afterDelay";
-          "files.autoSaveDelay" = 1000;
-          "window.commandCenter" = true;
-          #"workbench.colorTheme" = "SynthWave '84";
-          #"workbench.colorTheme" = "Monokai Pro (Filter Spectrum)";
-          "workbench.colorTheme" = "Tokyo Night Storm";
-          "workbench.tree.indent" = 24;
-          "git.autofetch" = true;
-          "vs-kubernetes" = {
-            "vs-kubernetes.crd-code-completion" = "enabled";
-          };
-          "terminal.external.linuxExec" = "ghostty";
-          "terminal.integrated.defaultProfile.linux" = "fish";
-          "editor.fontFamily" = "'Fira Code Symbol'";
-          "editor.inlayHints.fontFamily" = "Fira Code SymbolSymbol";
-          "editor.codeLensFontFamily" = "Fira Code Symbol";
-          "editor.inlineSuggest.fontFamily" = "Fira Code";
-          "terminal.integrated.fontFamily" = "'Fira Code', 'Fira Code Symbol'";
-          "docker.extension.experimental.composeCompletions" = true;
-          "workbench.activityBar.orientation" = "vertical";
-        };
-
-        extensions = with pkgs.vscode-extensions; [
-          golang.go
-          matangover.mypy
-          redhat.vscode-yaml
-          charliermarsh.ruff
-          ms-python.python
-          jnoortheen.nix-ide
-          vscodevim.vim
-          enkia.tokyo-night
-          # Unavaible nixos, install
-          #monokai.theme-monokai-pro-vscode
-        ];
-      };
-    };
-
-    ########################################################################
     # --- SSH config ---
     ########################################################################
     services.ssh-agent = {
