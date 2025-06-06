@@ -38,27 +38,27 @@ in
       "--disable traefik nginx"
     ];
 
-    #manifest = {
-    #  argocd-repo-credentials-pat = {
-    #    content = {
-    #      apiVersion = "v1";
-    #      kind = "Secret";
-    #      metadata = {
-    #        name = "gitops-repo-credentials-pat";
-    #        namespace = "argocd";
-    #        labels = {
-    #          "argocd.argoproj.io/secret-type" = "repository";
-    #        };
-    #      };
-    #      data = {
-    #        url = "https://github.com/Forgenn/gitops-cluster";
-    #        # The PAT is used as the password.
-    #        #password = builtins.readFile (fileToBase64 config.age.secrets.gitops_repo_pat.path);
-    #        type = builtins.readFile (toBase64 "git");
-    #      };
-    #    };
-    #  };
-    #};
+    manifests = {
+      argocd-repo-credentials-pat = {
+        content = {
+          apiVersion = "v1";
+          kind = "Secret";
+          metadata = {
+            name = "gitops-repo-credentials-pat";
+            namespace = "argocd";
+            labels = {
+              "argocd.argoproj.io/secret-type" = "repository";
+            };
+          };
+          data = {
+            url = "https://github.com/Forgenn/gitops-cluster";
+            # The PAT is used as the password.
+            sshPrivateKey = builtins.readFile (fileToBase64 config.age.secrets.gitops_deploy_key.path);
+            type = builtins.readFile (toBase64 "git");
+          };
+        };
+      };
+    };
 
     autoDeployCharts = {
       infisical = {

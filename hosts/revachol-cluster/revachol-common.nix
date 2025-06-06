@@ -3,6 +3,7 @@
   pkgs,
   lib,
   user,
+  inputs,
   ...
 }:
 
@@ -58,12 +59,12 @@
     group = "users";
   };
 
-  #age.secrets.gitops_repo_pat = {
-  #  file = ./secrets/gitops_repo_pat.age;
-  #  mode = "600";
-  #  owner = "ntb";
-  #  group = "users";
-  #};
+  age.secrets.gitops_deploy_key = {
+    file = ./secrets/gitops_deploy_key.age;
+    mode = "600";
+    owner = "ntb";
+    group = "users";
+  };
 
   programs.nix-ld.enable = true;
   # Bootloader.
@@ -101,7 +102,8 @@
     htop
     tmux
     tcpdump
-    agenix
+    # install agenix defined in flake
+    inputs.agenix.packages.${pkgs.system}.default
     nixd
     nixfmt-rfc-style
     kubernetes-helm
