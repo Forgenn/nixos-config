@@ -7,14 +7,7 @@
 }:
 
 {
-  imports = [
-    "${
-      builtins.fetchTarball {
-        url = "https://github.com/ryantm/agenix/archive/main.tar.gz";
-        sha256 = "0ngkhf7qamibhbl9z1dryzscd36y4fz1m1h6fb2z6fylw0b8029p";
-      }
-    }/modules/age.nix"
-  ];
+  imports = [ ];
 
   # Locale configuration
   i18n = {
@@ -101,16 +94,9 @@
     htop
     tmux
     tcpdump
-    age
     nixd
     nixfmt-rfc-style
     kubernetes-helm
-    (pkgs.callPackage "${
-      builtins.fetchTarball {
-        url = "https://github.com/ryantm/agenix/archive/main.tar.gz";
-        sha256 = "0ngkhf7qamibhbl9z1dryzscd36y4fz1m1h6fb2z6fylw0b8029p";
-      }
-    }/pkgs/agenix.nix" { })
   ];
 
   # Enable the OpenSSH daemon.

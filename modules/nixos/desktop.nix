@@ -38,7 +38,7 @@
   home-manager.users.${user} = {
 
     imports = [
-      ../home-manager/modules/i3.nix
+      ../home-manager/i3.nix
     ];
 
     programs.fish = {

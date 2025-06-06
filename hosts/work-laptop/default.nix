@@ -16,7 +16,7 @@
     ./hardware-configuration.nix
     ../common.nix
     ./overlays.nix
-    ./programs-config.nix
+    ../../modules/nixos/sunshine.nix
   ];
 
   # Hostname
@@ -36,6 +36,20 @@
 
   # Enable docker
   virtualisation.docker.enable = true;
+
+  # Enable KDE connect
+  programs.kdeconnect.enable = true;
+
+  # Enable chromium
+  programs.chromium = {
+    enable = true;
+    enablePlasmaBrowserIntegration = true;
+    plasmaBrowserIntegrationPackage = lib.mkDefault pkgs.kdePackages.plasma-browser-integration;
+  };
+
+  # Enable ssh
+  services.openssh.settings.X11Forwarding = true;
+  programs.ssh.startAgent = lib.mkOverride 10 true;
 
   services.upower.enable = true;
   powerManagement.enable = true;
@@ -79,41 +93,126 @@
   environment.systemPackages = with pkgs; [
     # General
     pkgs.chromium
-    slack
-    #overlay
-    code-cursor
-    pkgs.unstable.openbao
-    # Home integrations
-    pkgs.unstable.deskflow
-    sunshine
-    # Programming things
-    uv
-    python312
-    python313
-    buf
-    mypy
-    go
-    nodejs_24
-    postman
-    jq
-    vscode
-    ghostty
-    starship
-    nixfmt-rfc-style
-    nil
-    # GCP things
-    opentofu
-    kubernetes-helm
-    google-cloud-sdk
-    k9s
-    kubectl
-    (pkgs.google-cloud-sdk.withExtraComponents [
-      pkgs.google-cloud-sdk.components.gke-gcloud-auth-plugin
-    ])
     #Kde things
     kdePackages.powerdevil
     kdePackages.kwallet
     kdePackages.kwallet-pam
     kdePackages.plasma-thunderbolt
   ];
+
+  home-manager.users.${user} =
+    {
+      pkgs,
+      lib,
+      self,
+      ...
+    }:
+    {
+      imports = [
+        (self + "/modules/home-manager/i3.nix")
+        (self + "/modules/home-manager/cursor.nix")
+      ];
+
+      home.packages = with pkgs; [
+        slack
+        postman
+        ghostty
+        starship
+        code-cursor
+        pkgs.unstable.deskflow
+        uv
+        python313
+        buf
+        mypy
+        go
+        nodejs_24
+        jq
+        nixfmt-rfc-style
+        nil
+        opentofu
+        kubernetes-helm
+        k9s
+        kubectl
+        (pkgs.google-cloud-sdk.withExtraComponents [
+          pkgs.google-cloud-sdk.components.gke-gcloud-auth-plugin
+        ])
+        pkgs.unstable.openbao
+      ];
+
+      xsession.windowManager.i3.config = lib.mkMerge [
+        {
+          startup = [
+            {
+              command = "exec ${pkgs.xorg.xrandr}/bin/xrandr --output eDP-1 --primary --mode 1920x1200 --pos 3000x824 --rotate normal --scale 0.5x0.5 --filter nearest --auto --output DP-10 --mode 1920x1080 --pos 0x0 --rotate left   --scale 1x1 --auto --output DP-9 --mode 1920x1080 --pos 1080x420 --rotate normal --scale 1x1 --auto";
+              always = false;
+              notification = false;
+            }
+          ];
+          workspaceOutputAssign = [
+            {
+              output = "eDP-1";
+              workspace = "1";
+            }
+            {
+              output = "eDP-1";
+              workspace = "2";
+            }
+            {
+              output = "eDP-1";
+              workspace = "3";
+            }
+            {
+              output = "DP-8";
+              workspace = "4";
+            }
+            {
+              output = "DP-8";
+              workspace = "5";
+            }
+            {
+              output = "DP-8";
+              workspace = "6";
+            }
+            {
+              output = "DP-7";
+              workspace = "7";
+            }
+            {
+              output = "DP-7";
+              workspace = "8";
+            }
+            {
+              output = "DP-7";
+              workspace = "9";
+            }
+          ];
+        }
+      ];
+
+      programs.ssh.extraConfig = ''
+        Host github.com
+           Hostname github.com
+           AddKeysToAgent yes
+           IdentityFile  ~/.ssh/id_ed25519_ais
+
+        Host p.github.com
+           AddKeysToAgent no
+           Hostname github.com
+           IdentitiesOnly no
+           IdentityAgent none
+           IdentityFile  ~/.ssh/id_ed25519
+
+        Host gitlab.com
+          AddKeysToAgent yes
+          Hostname gitlab.com
+          IdentitiesOnly yes
+          IdentityFile  ~/.ssh/id_ed25519_ais
+
+        Host bitbucket.org
+          AddKeysToAgent yes
+          Hostname bitbucket.org
+          IdentitiesOnly yes
+          IdentityFile  ~/.ssh/id_ed25519_ais
+      '';
+    };
 }

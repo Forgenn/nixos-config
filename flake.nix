@@ -11,6 +11,10 @@
       url = "github:nix-community/home-manager/release-25.05";
       inputs.nixpkgs.follows = "nixpkgs"; # Ensures HM uses the same nixpkgs
     };
+    agenix = {
+      url = "github:ryantm/agenix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     # Add other flake inputs here if needed (e.g., overlays, specific apps)
     # hardware.url = "github:NixOS/nixos-hardware"; # Optional: For specific hardware presets
@@ -22,9 +26,13 @@
       nixpkgs,
       home-manager,
       nixpkgs-unstable,
+      agenix,
       ...
     }@inputs:
     let
+      # Import all overlays
+      overlays = import ./overlays { inherit (inputs) self; };
+
       # Helper function to generate a NixOS configuration
       mkNixosSystem =
         {
@@ -38,10 +46,12 @@
         nixpkgs.lib.nixosSystem {
           inherit system;
           specialArgs = {
-            inherit inputs user;
-            cursorOverlayFile = ./overlays/cursor-overlay.nix;
-            customOpensshOverlayFile = ./overlays/ssh-no-perm-overlay.nix;
-            opensshDontCheckPermPatch = ./patches/openssh-nix-dont-checkperm.patch;
+            inherit
+              inputs
+              user
+              self
+              overlays
+              ;
           };
 
           modules = [
@@ -61,6 +71,9 @@
               }
             )
 
+            # Agenix module for secrets management
+            agenix.nixosModules.default
+
             # Import host-specific configuration
             (
               if isCluster then
@@ -75,8 +88,8 @@
             {
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
-              home-manager.users.${user} = import ./home-manager/${user}/home.nix;
-              home-manager.extraSpecialArgs = { inherit inputs user; };
+              home-manager.users.${user} = import ./users/${user}/home.nix;
+              home-manager.extraSpecialArgs = { inherit inputs user self; };
             }
           ] ++ extraModules;
         };
@@ -88,7 +101,7 @@
           system = "x86_64-linux";
           device = "work-laptop";
           user = "ntb";
-          extraModules = [ ./modules/desktop.nix ];
+          extraModules = [ ./modules/nixos/desktop.nix ];
         };
 
         ############################

@@ -10,7 +10,7 @@
 
 {
   imports = [
-    ./../modules/base.nix # Import base module for common packages/settings
+    ./../modules/nixos/base.nix # Import base module for common packages/settings
   ];
 
   # Basic system setup
