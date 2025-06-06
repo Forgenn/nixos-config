@@ -58,6 +58,13 @@
     group = "users";
   };
 
+  #age.secrets.gitops_repo_pat = {
+  #  file = ./secrets/gitops_repo_pat.age;
+  #  mode = "600";
+  #  owner = "ntb";
+  #  group = "users";
+  #};
+
   programs.nix-ld.enable = true;
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
@@ -94,6 +101,7 @@
     htop
     tmux
     tcpdump
+    agenix
     nixd
     nixfmt-rfc-style
     kubernetes-helm
@@ -112,6 +120,11 @@
             Hostname github.com
             IdentitiesOnly yes
             IdentityFile  ${config.age.secrets.github_node_key.path}
+      Host dolores.home
+            AddKeysToAgent yes
+            Hostname dolores.home
+            IdentitiesOnly yes
+            IdentityFile  ${config.age.secrets.nas_node_key.path}
     '';
   };
 
