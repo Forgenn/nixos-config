@@ -53,7 +53,8 @@ in
           data = {
             url = "https://github.com/Forgenn/gitops-cluster";
             # The PAT is used as the password.
-            sshPrivateKey = builtins.readFile (fileToBase64 config.age.secrets.gitops_deploy_key.path);
+            # Not working, not finding /run/agenix secret
+            #sshPrivateKey = builtins.readFile (fileToBase64 config.age.secrets.gitops_deploy_key.path);
             type = builtins.readFile (toBase64 "git");
           };
         };
