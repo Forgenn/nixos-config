@@ -6,15 +6,10 @@ let
   kubeMasterHostname = "api.kube-cluster.revachol.home";
   #kubeMasterAPIServerPort = 6443;
 
-  # Helper function to base64 encode a string using a derivation
-  toBase64 = str: pkgs.runCommand "string-to-base64" {} ''
-    echo -n "${str}" | ${pkgs.coreutils-full}/bin/base64 -w0 > $out
-  '';
-
-  # Helper function to base64 encode file contents
-  fileToBase64 = filePath: pkgs.runCommand "file-to-base64" {} ''
-    ${pkgs.coreutils-full}/bin/base64 -w0 ${filePath} > $out
-  '';
+  # Import needed bootstraping manifests/charts from other files
+  argocdManifests = import ./manifests/bootstrap-argocd-manifests.nix { 
+    inherit pkgs config lib;
+  };
 in
 {
   # resolve master hostname
@@ -38,29 +33,9 @@ in
       "--disable traefik nginx"
     ];
 
-    manifests = {
-      argocd-repo-credentials-pat = {
-        content = {
-          apiVersion = "v1";
-          kind = "Secret";
-          metadata = {
-            name = "gitops-repo-credentials-pat";
-            namespace = "argocd";
-            labels = {
-              "argocd.argoproj.io/secret-type" = "repository";
-            };
-          };
-          data = {
-            url = "https://github.com/Forgenn/gitops-cluster";
-            # The PAT is used as the password.
-            # Not working, not finding /run/agenix secret
-            #sshPrivateKey = builtins.readFile (fileToBase64 config.age.secrets.gitops_deploy_key.path);
-            type = builtins.readFile (toBase64 "git");
-          };
-        };
-      };
-    };
+    manifests = argocdManifests;
 
+    # If repos public, infisical/eso not needed on bootstrap
     autoDeployCharts = {
       infisical = {
         name = "infisical-standalone";
