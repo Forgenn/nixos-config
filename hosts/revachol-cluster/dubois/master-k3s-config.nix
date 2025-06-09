@@ -43,6 +43,7 @@ in
 
   services.k3s = {
     enable = true;
+    gracefulNodeShutdown.enable = true;
     # Management AND node
     role = "server";
     tokenFile = config.age.secrets.k3s_token.path;
