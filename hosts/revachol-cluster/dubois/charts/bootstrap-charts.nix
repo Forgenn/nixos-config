@@ -35,16 +35,17 @@
       };
 
       argocd = {
+        enable = true;
         name = "argo-cd";
         repo = "https://argoproj.github.io/argo-helm";
-        version = "8.0.14";
-        hash = "sha256-7woJUYBN724uMvhH73EeYIcCvb3/vawUmvrWsgVhkGQ=";
+        version = "8.0.16";
+        hash = "sha256-TEFNMFuQ+zukQiA1mbGezacLIvPcn2pMqFsDsyifxng=";
         targetNamespace = "argocd";
         createNamespace = true;
         values = {
           # Bootstrap argocd not HA for faster startup
           redis-ha = {
-            enabled = false;
+            enabled = true;
           };
         };
       };

@@ -6,12 +6,11 @@ let
   kubeMasterHostname = "api.kube-cluster.revachol.home";
   #kubeMasterAPIServerPort = 6443;
 
-  # Import needed bootstraping manifests/charts from other files
-  argocdManifests = import ./manifests/bootstrap-argocd-manifests.nix { 
-    inherit pkgs config lib;
+  bootStrapCharts = import ./charts/bootstrap-charts.nix { inherit pkgs config lib; };
+  argocdManifests = import ./manifests/bootstrap-argocd-manifests.nix { inherit pkgs config lib; };
+  democraticCsiConfig = import ./manifests/bootstrap-democratic-csi-zfs.nix {
+    inherit pkgs config lib; # Pass pkgs for yq
   };
-
-  bootStrapCharts = import ./charts/bootstrap-charts.nix {};
 in
 {
   # resolve master hostname
@@ -23,6 +22,24 @@ in
     kubectl
     kubernetes
   ];
+  
+  systemd.services.democratic-csi-manifest-key-injector = {
+    description = "Inject SSH key into Democratic CSI K3s manifest";
+    wantedBy = [ "multi-user.target" ]; # Run fairly early
+    after = [ "network-online.target" ]; # Ensure agenix ran and network is up (though not strictly needed for local file ops)
+    before = [ "k3s.service" ]; # Try to run before k3s fully starts processing manifests
+
+    # Add necessary packages to PATH for the script
+    path = [ pkgs.coreutils-full pkgs.gnused pkgs.yq ];
+
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true; # Important for `before=` ordering if k3s depends on it
+      ExecStart = "${democraticCsiConfig.updateManifestScript}/bin/update-csi-manifest-key";
+      # If this fails, we probably don't want k3s to start with a broken CSI config.
+      # But making k3s.service hard-depend on it might be complex.
+    };
+  };
 
   services.k3s = {
     enable = true;
@@ -35,8 +52,11 @@ in
       "--disable traefik nginx"
     ];
 
-    manifests = argocdManifests;
-    
+    # K3s will write the manifests defined in democraticCsiConfig.manifests
+    # to /var/lib/rancher/k3s/server/manifests/.
+    # The systemd service above will then attempt to modify one of those files.
+    manifests = argocdManifests // democraticCsiConfig.manifests;
+
     autoDeployCharts = bootStrapCharts;
   };
 }
