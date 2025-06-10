@@ -1,4 +1,10 @@
-{ pkgs, config, lib, agenix, ... }:
+{
+  pkgs,
+  config,
+  lib,
+  agenix,
+  ...
+}:
 let
   # When using easyCerts=true the IP Address must resolve to the master on creation.
   # So use simply 127.0.0.1 in that case. Otherwise you will have errors like this https://github.com/NixOS/nixpkgs/issues/59364
@@ -22,7 +28,7 @@ in
     kubectl
     kubernetes
   ];
-  
+
   systemd.services.democratic-csi-manifest-key-injector = {
     description = "Inject SSH key into Democratic CSI K3s manifest";
     wantedBy = [ "multi-user.target" ]; # Run fairly early
@@ -30,14 +36,16 @@ in
     before = [ "k3s.service" ]; # Try to run before k3s fully starts processing manifests
 
     # Add necessary packages to PATH for the script
-    path = [ pkgs.coreutils-full pkgs.gnused pkgs.yq ];
+    path = [
+      pkgs.coreutils-full
+      pkgs.gnused
+      pkgs.yq
+    ];
 
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true; # Important for `before=` ordering if k3s depends on it
       ExecStart = "${democraticCsiConfig.updateManifestScript}/bin/update-csi-manifest-key";
-      # If this fails, we probably don't want k3s to start with a broken CSI config.
-      # But making k3s.service hard-depend on it might be complex.
     };
   };
 

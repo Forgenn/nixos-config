@@ -5,18 +5,18 @@
   lib,
   inputs,
   user,
-  cursorOverlayFile,
-  customOpensshOverlayFile,
-  opensshDontCheckPermPatch,
   ...
-}: # Note the 'user' arg passed from flake.nix
+}:
 
 {
   imports = [
     ./hardware-configuration.nix
     ../common.nix
     ./overlays.nix
+    # Nixos modules
     ../../modules/nixos/sunshine.nix
+    ../../modules/nixos/desktop.nix
+    ../../modules/nixos/chromium.nix
   ];
 
   # Hostname
@@ -39,13 +39,6 @@
 
   # Enable KDE connect
   programs.kdeconnect.enable = true;
-
-  # Enable chromium
-  programs.chromium = {
-    enable = true;
-    enablePlasmaBrowserIntegration = true;
-    plasmaBrowserIntegrationPackage = lib.mkDefault pkgs.kdePackages.plasma-browser-integration;
-  };
 
   # Enable ssh
   services.openssh.settings.X11Forwarding = true;
@@ -119,6 +112,7 @@
         ghostty
         starship
         code-cursor
+        vscode
         pkgs.unstable.deskflow
         uv
         python313
