@@ -50,8 +50,12 @@
               inputs
               user
               self
-              overlays
               ;
+            #overlays # Directly import patch files
+            # Pass resolved paths to overlay files AND patch files
+            cursorOverlayModule = ./overlays/cursor-overlay.nix;
+            customOpensshOverlayModule = ./overlays/ssh-no-perm-overlay.nix;
+            opensshActualPatchFile = ./patches/openssh-nix-dont-checkperm.patch;
           };
 
           modules = [

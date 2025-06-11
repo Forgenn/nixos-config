@@ -120,6 +120,7 @@
         mypy
         go
         nodejs_24
+        btop
         jq
         nixfmt-rfc-style
         nil

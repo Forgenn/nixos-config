@@ -23,6 +23,11 @@
         terminal = "${pkgs.ghostty}/bin/ghostty";
         launcher = "${pkgs.rofi}/bin/rofi -show run";
         lockScreenCmd = "${pkgs.systemd}/bin/systemd-run --user --quiet ${pkgs.systemd}/bin/loginctl lock-session";
+        wallpaper = pkgs.fetchurl {
+          url = "https://nextcloud.monederobox.xyz/s/wRf36sseHsgSnfW";
+          sha256 = "sha256-HC8Npib57scngiRBkorlUprhpZoymTF7lRopHjLpmco=";
+          name = "i3-wallpaper.jpg";
+        };
       in
       {
         # All your previous config settings go here:
@@ -281,7 +286,7 @@
         startup = [
           #{ command = "${pkgs.dex}/bin/dex --autostart --environment i3"; notification = false; always = true; }
           {
-            command = "${pkgs.feh}/bin/feh --bg-fill --no-xinerama ~/.local/share/themes/re-wall.jpg";
+            command = "${pkgs.feh}/bin/feh --bg-fill --no-xinerama ${wallpaper}";
             notification = false;
             always = true;
           }
