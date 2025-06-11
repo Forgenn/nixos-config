@@ -104,6 +104,7 @@
       imports = [
         (self + "/modules/home-manager/i3.nix")
         (self + "/modules/home-manager/cursor.nix")
+        (self + "/modules/home-manager/btop.nix")
       ];
 
       home.packages = with pkgs; [
@@ -120,7 +121,6 @@
         mypy
         go
         nodejs_24
-        btop
         jq
         nixfmt-rfc-style
         nil
