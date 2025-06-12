@@ -23,10 +23,11 @@
         terminal = "${pkgs.ghostty}/bin/ghostty";
         launcher = "${pkgs.rofi}/bin/rofi -show run";
         lockScreenCmd = "${pkgs.systemd}/bin/systemd-run --user --quiet ${pkgs.systemd}/bin/loginctl lock-session";
+        #lockScreenCmd = "${pkgs.}"
         wallpaper = pkgs.fetchurl {
-          url = "https://nextcloud.monederobox.xyz/s/wRf36sseHsgSnfW";
-          sha256 = "sha256-HC8Npib57scngiRBkorlUprhpZoymTF7lRopHjLpmco=";
-          name = "i3-wallpaper.jpg";
+          url = "https://nextcloud.monederobox.xyz/s/wRf36sseHsgSnfW/download/disco_elysium_wallpaper.jpg";
+          sha256 = "sha256-jyAh9KcIFQULwp+wja08xxm4yC7KuDvnx2Tczkd18fk=";
+          name = "wallpaper.jpg";
         };
       in
       {

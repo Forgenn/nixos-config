@@ -1,6 +1,7 @@
 # modules/desktop.nix
 # Example module for desktop-specific settings, imported by laptop config
 {
+  self,
   config,
   pkgs,
   lib,
@@ -32,6 +33,33 @@
       };
       blur-background = true;
     };
+  };
+  #######################
+  # SDDM Custom config
+  #######################
+  environment.systemPackages = with pkgs; [
+    (pkgs.callPackage (self + /packages/sddm-astronaut-theme.nix) {
+      #theme = "black_hole"; # default is astronaut
+      theme = "astronaut";
+      themeConfig = {
+        General = {
+          HeaderText = "Hi";
+          #Background = "/home/user/Desktop/wp.png";
+          FontSize = "10.0";
+        };
+      };
+    })
+  ];
+
+  services.displayManager.sddm = {
+    enable = true;
+    enableHidpi = true;
+    theme = "sddm-astronaut-theme";
+    extraPackages = with pkgs; [
+      kdePackages.qtsvg
+      kdePackages.qtmultimedia
+      kdePackages.qtvirtualkeyboard
+    ];
   };
 
   # hm configuration
@@ -143,8 +171,6 @@
   # Disable plasma kwin window manager
   systemd.user.services.plasma-kwin_x11.enable = false;
 
-  # Enable the Plasma Desktop Environment.
-  services.displayManager.sddm.enable = true;
   services.desktopManager.plasma6.enable = true;
 
   # Configure sound server
@@ -157,10 +183,4 @@
     pulse.enable = true;
     # jack.enable = true; # If needed
   };
-
-  # Add some common desktop packages
-  environment.systemPackages = with pkgs; [
-    kdePackages.knewstuff
-    kdePackages.kscreen
-  ];
 }
