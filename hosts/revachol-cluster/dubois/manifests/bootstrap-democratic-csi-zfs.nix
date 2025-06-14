@@ -20,8 +20,8 @@ let
       datasetEnableQuotas: true
       datasetEnableReservation: false
       datasetPermissionsMode: "0777"
-      datasetPermissionsUser: 0
-      datasetPermissionsGroup: 0
+      datasetPermissionsUser: revachol-csi-user
+      datasetPermissionsGroup: revachol-csi-user
 
     nfs:
       shareStrategy: "setDatasetProperties"
