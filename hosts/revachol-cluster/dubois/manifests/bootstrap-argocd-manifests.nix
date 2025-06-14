@@ -60,6 +60,7 @@ in
                   };
                   syncOptions = [
                     "CreateNamespace=true"
+                    "ServerSideApply=true"
                   ];
                 };
               };
