@@ -9,11 +9,12 @@ let
       host: dolores.home
       port: 22
       username: revachol-csi-user
-      password: "" # Important to keep this if no password
       privateKey: |
         __SSH_PRIVATE_KEY_PLACEHOLDER__
 
     zfs:
+      cli:
+        sudoEnabled: true
       datasetParentName: revachol-pool/k8s-data/main
       detachedSnapshotsDatasetParentName: revachol-pool/k8s-data/snapshots
       datasetEnableQuotas: true
