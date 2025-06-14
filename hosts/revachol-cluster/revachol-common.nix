@@ -114,6 +114,9 @@
   services.openssh.settings.PasswordAuthentication = false;
   services.openssh.settings.X11Forwarding = true;
 
+  # Important to enable rpcbind for kubernetes NFS PVC mounting
+  services.rpcbind.enable = true;
+
   # Configure git to use the decrypted github_node_key for SSH
   programs.ssh = {
     extraConfig = ''
