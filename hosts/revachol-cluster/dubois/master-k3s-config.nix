@@ -58,7 +58,8 @@ in
     clusterInit = true;
     extraFlags = [
       "--tls-san dubois.home api.kube-cluster.revachol.home"
-      "--disable traefik nginx"
+      "--disable=traefik"
+      "--disable=nginx"
     ];
 
     # K3s will write the manifests defined in democraticCsiConfig.manifests
