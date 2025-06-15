@@ -21,10 +21,6 @@ in
     enable = true;
     # Management AND node
     role = "agent";
-    extraFlags = [
-      "--disable=traefik"
-      "--disable=nginx"
-    ];
     tokenFile = ./secrets/k3s_token.age;
     serverAddr = "https://" + kubeMasterHostname + ":" + (builtins.toString kubeMasterAPIServerPort);
   };
