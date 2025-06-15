@@ -22,9 +22,6 @@ in
     # Management AND node
     role = "agent";
     tokenFile = ./secrets/k3s_token.age;
-    extraFlags = [
-      "--write-kubeconfig-mode 664"
-    ];
     serverAddr = "https://" + kubeMasterHostname + ":" + (builtins.toString kubeMasterAPIServerPort);
   };
 }
