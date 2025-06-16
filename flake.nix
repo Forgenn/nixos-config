@@ -101,9 +101,9 @@
     {
       # Define NixOS configurations for each host
       nixosConfigurations = {
-        work-laptop = mkNixosSystem {
+        as-pm = mkNixosSystem {
           system = "x86_64-linux";
-          device = "work-laptop";
+          device = "as-pm";
           user = "ntb";
           extraModules = [ ./modules/nixos/desktop.nix ];
         };
