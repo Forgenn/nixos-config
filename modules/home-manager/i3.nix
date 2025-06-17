@@ -8,6 +8,11 @@
 {
   services.picom.enable = true;
   # Define i3 settings under the xsession path
+  programs.rofi = {
+    enable = true;
+    theme = "solarized_alternate";
+  };
+
   xsession.windowManager.i3 = {
     # Enable this module to generate the config and potentially set things up
     enable = true;
