@@ -24,11 +24,8 @@
         };
         "terminal.external.linuxExec" = "ghostty";
         "terminal.integrated.defaultProfile.linux" = "fish";
-        "editor.fontFamily" = "'Fira Code Symbol'";
-        "editor.inlayHints.fontFamily" = "Fira Code SymbolSymbol";
-        "editor.codeLensFontFamily" = "Fira Code Symbol";
-        "editor.inlineSuggest.fontFamily" = "Fira Code";
-        "terminal.integrated.fontFamily" = "'Fira Code', 'Fira Code Symbol'";
+        "editor.fontFamily" = "'Fira Code'";
+        "editor.fontLigatures" = true;
         "docker.extension.experimental.composeCompletions" = true;
         "workbench.activityBar.orientation" = "vertical";
         "vim.handleKeys" = {
