@@ -20,7 +20,7 @@
   };
 
   # Common networking settings
-  networking.firewall.enable = true;
+  networking.firewall.enable = false;
   networking.firewall.allowedTCPPorts = [
     22
     6443 # k3s: kube api server
