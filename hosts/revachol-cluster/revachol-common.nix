@@ -32,6 +32,17 @@
     8472 # k3s, flannel
   ];
 
+  boot.kernel.sysctl = {
+    # This is the most critical setting for MetalLB Layer 2 mode.
+    # It allows a node to respond to an ARP "who-has" request for an IP
+    # that is not configured on the interface that receives the request.
+    "net.ipv4.conf.all.arp_filter" = 0;
+
+    # Also good practice for Kubernetes networking in general
+    "net.bridge.bridge-nf-call-iptables" = 1;
+    "net.ipv4.ip_forward" = 1;
+  };
+
   # Enable agenix
   age = {
     identityPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
