@@ -56,11 +56,14 @@ in
     role = "server";
     tokenFile = config.age.secrets.k3s_token.path;
     clusterInit = true;
-    extraFlags = ''
-      --tls-san "dubois.home api.kube-cluster.revachol.home"
-      --disable=traefik
-      --disable=servicelb
-    '';
+    extraFlags = [
+      "--tls-san"  # The flag
+      "dubois.home api.kube-cluster.revachol.home"
+      
+      "--disable=servicelb"
+      "--disable=traefik"
+      "--disable=argo-cd"
+  ];
 
     # K3s will write the manifests defined in democraticCsiConfig.manifests
     # to /var/lib/rancher/k3s/server/manifests/.
