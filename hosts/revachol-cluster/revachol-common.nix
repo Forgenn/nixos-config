@@ -33,10 +33,11 @@
   ];
 
   boot.kernel.sysctl = {
-    # This is the most critical setting for MetalLB Layer 2 mode.
-    # It allows a node to respond to an ARP "who-has" request for an IP
-    # that is not configured on the interface that receives the request.
     "net.ipv4.conf.all.arp_filter" = 0;
+
+    
+    "net.ipv4.conf.all.route_localnet" = 1;
+    "net.ipv4.conf.enp2s0.route_localnet" = 1; # Also set it on the specific interface
 
     # Ignore ARP requests for IPs that dont match the receiving interface
     "net.ipv4.conf.enp2s0.arp_ignore" = 1;
