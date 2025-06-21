@@ -56,19 +56,20 @@ in
     role = "server";
     tokenFile = config.age.secrets.k3s_token.path;
     clusterInit = true;
+    
     extraFlags = [
-      "--tls-san"  # The flag
-      "dubois.home api.kube-cluster.revachol.home"
-      
-      "--disable=servicelb"
-      "--disable=traefik"
-      "--disable=argo-cd"
+      "--tls-san=dubois.home,api.kube-cluster.revachol.home"  # The flag
+      "--disable=traefik,servicelb"
   ];
 
     # K3s will write the manifests defined in democraticCsiConfig.manifests
     # to /var/lib/rancher/k3s/server/manifests/.
     # The systemd service above will then attempt to modify one of those files.
-    manifests = argocdManifests // democraticCsiConfig.manifests;
+    manifests = argocdManifests // democraticCsiConfig.manifests // { 
+      traefik = {
+        enable = false;
+        };
+      };
 
     autoDeployCharts = bootStrapCharts;
   };

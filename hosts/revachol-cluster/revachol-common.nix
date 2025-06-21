@@ -38,6 +38,11 @@
     # that is not configured on the interface that receives the request.
     "net.ipv4.conf.all.arp_filter" = 0;
 
+    # Ignore ARP requests for IPs that dont match the receiving interface
+    "net.ipv4.conf.all.arp_ignore" = 1;
+    # 
+    "net.ipv4.conf.all.arp_announce" = 2;
+
     # Also good practice for Kubernetes networking in general
     "net.bridge.bridge-nf-call-iptables" = 1;
     "net.ipv4.ip_forward" = 1;
