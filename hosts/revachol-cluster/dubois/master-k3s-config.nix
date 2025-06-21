@@ -60,16 +60,11 @@ in
     extraFlags = [
       "--tls-san=dubois.home,api.kube-cluster.revachol.home"  # The flag
       "--disable=traefik,servicelb"
-    ];
 
-    extraKubeProxyConfig = {
-      mode = "ipvs";
-      ipvs = {
-        scheduler = "rr";
-        # Setting a timeout of 0 can sometimes help with UDP issues
-        udpTimeout = "0s";
-      };
-    };
+      # Enable ipvs
+      "--kube-proxy-arg=proxy-mode=ipvs"
+      "--kube-proxy-arg=ipvs-strict-arp=true"
+    ];
 
     # K3s will write the manifests defined in democraticCsiConfig.manifests
     # to /var/lib/rancher/k3s/server/manifests/.

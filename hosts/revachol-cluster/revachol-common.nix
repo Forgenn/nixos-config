@@ -32,6 +32,14 @@
     8472 # k3s, flannel
   ];
 
+  boot.kernelModules = [
+  "ip_vs"
+  "ip_vs_rr" # Round Robin scheduler
+  "ip_vs_wrr" # Weighted Round Robin scheduler
+  "ip_vs_sh" # Source Hashing scheduler
+  "nf_conntrack" # Required by IPVS
+  ];
+
   boot.kernel.sysctl = {
     "net.ipv4.conf.all.arp_filter" = 0;
 
