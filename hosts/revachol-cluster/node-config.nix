@@ -23,5 +23,13 @@ in
     role = "agent";
     tokenFile = ./secrets/k3s_token.age;
     serverAddr = "https://" + kubeMasterHostname + ":" + (builtins.toString kubeMasterAPIServerPort);
+    extraKubeProxyConfig = {
+      mode = "ipvs";
+      ipvs = {
+        scheduler = "rr";
+        # Setting a timeout of 0 can sometimes help with UDP issues
+        udpTimeout = "0s";
+      };
+    };
   };
 }
