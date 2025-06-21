@@ -39,9 +39,10 @@
     "net.ipv4.conf.all.arp_filter" = 0;
 
     # Ignore ARP requests for IPs that dont match the receiving interface
-    "net.ipv4.conf.all.arp_ignore" = 1;
-    # 
-    "net.ipv4.conf.all.arp_announce" = 2;
+    "net.ipv4.conf.enp2s0.arp_ignore" = 1;
+    # When sending packets through enp2s0, the sending IP must exist in the interface
+    # if not it may use Virtual IP from metallb
+    "net.ipv4.conf.enp2s0.arp_announce" = 2;
 
     # Also good practice for Kubernetes networking in general
     "net.bridge.bridge-nf-call-iptables" = 1;
