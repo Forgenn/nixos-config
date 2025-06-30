@@ -17,6 +17,7 @@
     ../../modules/nixos/sunshine.nix
     ../../modules/nixos/desktop.nix
     ../../modules/nixos/chromium.nix
+    ../../modules/nixos/hyprland.nix
   ];
 
   # Hostname
@@ -58,6 +59,7 @@
       "wheel"
       "video"
       "audio"
+      "input"
     ]; # 'wheel' for sudo access
     initialHashedPassword = "*"; # Set a password manually or use home-manager/impermanence
     openssh.authorizedKeys.keys = [
@@ -132,6 +134,8 @@
           pkgs.google-cloud-sdk.components.gke-gcloud-auth-plugin
         ])
         pkgs.unstable.openbao
+        gh
+        gemini-cli
       ];
 
       xsession.windowManager.i3.config = lib.mkMerge [
