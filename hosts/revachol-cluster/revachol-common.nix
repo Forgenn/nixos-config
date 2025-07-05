@@ -92,6 +92,13 @@
     group = "users";
   };
 
+  age.secrets.infisical_machine_creds_manifest = {
+    file = ./secrets/infisical_machine_creds_manifest.age;
+    mode = "600";
+    owner = "ntb";
+    group = "users";
+  };
+
   programs.nix-ld.enable = true;
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
