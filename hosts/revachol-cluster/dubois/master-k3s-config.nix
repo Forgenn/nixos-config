@@ -49,6 +49,24 @@ in
     };
   };
 
+  systemd.services.k3s-secret-symlink = {
+    description = "Create symlink for k3s secrets";
+    wantedBy = [ "multi-user.target" ];
+    after = [ "network-online.target" ]; # Ensure agenix has decrypted the secret
+    before = [ "k3s.service" ]; # Ensure symlink is in place before k3s starts
+
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+      ExecStart = pkgs.writeShellScript "create-k3s-secret-symlink" ''
+        mkdir -p /var/lib/k3s/secrets
+        ln -sf ${config.age.secrets.infisical_machine_creds_manifest.path} /var/lib/rancher/k3s/server/manifests/infisical-machine-creds-manifest.yaml
+        chown ntb:users /var/lib/rancher/k3s/server/manifests/infisical-machine-creds-manifest.yaml
+        chmod 600 /var/lib/rancher/k3s/server/manifests/infisical-machine-creds-manifest.yaml
+      '';
+    };
+  };
+
   services.k3s = {
     enable = true;
     gracefulNodeShutdown.enable = true;
@@ -69,11 +87,20 @@ in
     # K3s will write the manifests defined in democraticCsiConfig.manifests
     # to /var/lib/rancher/k3s/server/manifests/.
     # The systemd service above will then attempt to modify one of those files.
-    manifests = argocdManifests // democraticCsiConfig.manifests // { 
-      traefik = {
-        enable = false;
-        };
+    manifests = lib.mkMerge [
+    argocdManifests
+    democraticCsiConfig.manifests
+    {
+      traefik.enable = false;
+    }
+    {
+      infisical_machine_creds_manifest = {
+        enable = true;
+        source = config.age.secrets.infisical_machine_creds_manifest.path;
+        target = "infisical_machine_creds_manifest.yaml";
       };
+    }
+  ];
 
     autoDeployCharts = bootStrapCharts;
   };
