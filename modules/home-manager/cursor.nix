@@ -15,8 +15,8 @@
         "window.commandCenter" = true;
         #"workbench.colorTheme" = "SynthWave '84";
         #"workbench.colorTheme" = "Monokai Pro (Filter Spectrum)";
-        "workbench.colorTheme" = "Monokai Classic";
-        #"workbench.colorTheme" = "Tokyo Night Storm";
+        #"workbench.colorTheme" = "Monokai Classic";
+        "workbench.colorTheme" = "Tokyo Night Storm";
         "workbench.tree.indent" = 24;
         "git.autofetch" = true;
         "vs-kubernetes" = {

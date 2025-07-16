@@ -136,6 +136,9 @@
         pkgs.unstable.openbao
         gh
         gemini-cli
+        claude-code
+        bitwarden-desktop
+        x2goclient
       ];
 
       xsession.windowManager.i3.config = lib.mkMerge [
