@@ -115,6 +115,7 @@
         ghostty
         starship
         code-cursor
+        zed-editor
         vscode
         pkgs.unstable.deskflow
         uv
@@ -215,6 +216,10 @@
           Hostname bitbucket.org
           IdentitiesOnly yes
           IdentityFile  ~/.ssh/id_ed25519_ais
+
+        Host compilaistron.wks.aistech
+          User pol
+
       '';
     };
 }

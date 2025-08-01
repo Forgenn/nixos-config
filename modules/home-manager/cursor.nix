@@ -38,6 +38,9 @@
           "<C-s>" = true;
           "<C-p>" = false;
         };
+        "remote.SSH.remotePlatform" = {
+          "pol@compilaistron.wks.aistech" = "linux";
+        };
       };
 
       extensions = with pkgs.vscode-extensions; [
