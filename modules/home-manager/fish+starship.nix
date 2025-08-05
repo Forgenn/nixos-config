@@ -3,6 +3,21 @@
   programs.fish = {
     enable = true;
     shellInit = "starship init fish | source";
+    shellAliases = {
+        g = "git";
+        ga = "git add";
+        gaa = "git add --all";
+        gc = "git commit";
+        gcm = "git commit -m";
+        gco = "git checkout";
+        gcb = "git checkout -b";
+        gs = "git status";
+        gst = "git status -s";
+        gl = "git log --oneline --graph --decorate";
+        gp = "git push";
+        gpf = "git push --force";
+        gup = "git pull --rebase";
+      };
   };
 
   programs.starship = {

@@ -215,7 +215,7 @@
           AddKeysToAgent yes
           Hostname bitbucket.org
           IdentitiesOnly yes
-          IdentityFile  ~/.ssh/id_ed25519_ais
+          IdentityFile  ~/.ssh/id_ed25519_bitbucket
 
         Host compilaistron.wks.aistech
           User pol
