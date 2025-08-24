@@ -108,6 +108,16 @@
           extraModules = [ ./modules/nixos/desktop.nix ];
         };
 
+        ###############
+        # t440 laptop
+        ###############
+        t440 = mkNixosSystem {
+          system = "x86_64-linux";
+          device = "t440";
+          user = "ntb";
+          extraModules = [ ./modules/nixos/desktop.nix ];
+        };
+        
         ############################
         # Revachol cluster nodes
         ############################
