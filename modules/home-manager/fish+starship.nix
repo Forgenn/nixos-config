@@ -17,6 +17,10 @@
         gp = "git push";
         gpf = "git push --force";
         gup = "git pull --rebase";
+        k = "kubectl";
+        kc = "kubectl";
+        kd = "kubectl describe";
+        kf = "kubectl get pods -o wide";
       };
   };
 
