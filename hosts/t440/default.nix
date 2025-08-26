@@ -9,6 +9,7 @@
 }:
 
 {
+  # --- Imports ---
   imports = [
     ./hardware-configuration.nix
     ../common.nix
@@ -20,7 +21,7 @@
     ../../modules/nixos/hyprland.nix
   ];
 
-  # boot
+  # --- Boot ---
   boot.loader.grub.enable = false;
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
@@ -28,41 +29,32 @@
   # zfs
   # should set auto snapshots
   boot.zfs.extraPools = [ "zpool" ];
-  networking.hostId = "7777a778";
   boot.zfs.devNodes = "/dev/disk/by-id";
-  services.zfs.autoScrub.enable = true;
-
   boot.kernelPackages = config.boot.zfs.package.latestCompatibleLinuxPackages;
 
-
-  # Hostname
+  # --- Networking ---
+  networking.hostId = "7777a778";
   networking.hostName = "t440";
   networking.networkmanager.enable = true;
   networking.wireless.iwd.enable = true;
   networking.networkmanager.wifi.backend = "iwd";
 
-  # Enable bluetooth
+  # --- Hardware ---
   hardware.bluetooth.enable = true;
   hardware.bluetooth.powerOnBoot = true;
 
-  # Install Bolt Daemon
+  # --- Services ---
   services.hardware.bolt.enable = true;
-
-  # Enable docker
   virtualisation.docker.enable = true;
-
-  # Enable KDE connect
   programs.kdeconnect.enable = true;
-
-  # Enable ssh
   services.openssh.settings.X11Forwarding = true;
   programs.ssh.startAgent = lib.mkOverride 10 true;
-
   services.upower.enable = true;
   powerManagement.enable = true;
   services.power-profiles-daemon.enable = true;
+  services.zfs.autoScrub.enable = true;
 
-  # Define the primary user account on this system
+  # --- User Configuration ---
   users.users.${user} = {
     isNormalUser = true;
     description = "ntb";
@@ -81,23 +73,23 @@
     ];
   };
 
+  # --- Security ---
   security.sudo.wheelNeedsPassword = true; # Or true if you prefer
 
-  # Firewall settings
+  # --- Firewall ---
   networking.firewall = {
     enable = true;
     allowedTCPPorts = [ 22 ];
   };
 
+  # --- Fonts ---
   fonts.packages = with pkgs; [
     fira-code
     fira-code-symbols
   ];
 
-  # Needed to make some programs work (remote vscode)
+  # --- Packages ---
   programs.nix-ld.enable = true;
-
-  # Laptop specific packages (less common, prefer home-manager)
   environment.systemPackages = with pkgs; [
     # General
     pkgs.chromium
@@ -108,6 +100,7 @@
     kdePackages.plasma-thunderbolt
   ];
 
+  # --- Home Manager ---
   home-manager.users.${user} =
     {
       pkgs,
