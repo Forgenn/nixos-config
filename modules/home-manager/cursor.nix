@@ -3,6 +3,10 @@
   ########################################################################
   # --- Cursor config ---
   ########################################################################
+
+  # Enable fontconfig to ensure fonts are properly registered
+  fonts.fontconfig.enable = true;
+
   programs.vscode = {
     enable = true;
     package = pkgs.code-cursor;
@@ -24,8 +28,18 @@
         };
         "terminal.external.linuxExec" = "ghostty";
         "terminal.integrated.defaultProfile.linux" = "fish";
-        "editor.fontFamily" = "'Fira Code'";
+
+        # use Fira Code with JetBrainsMono Nerd Font as fallback for icons
+        "editor.fontFamily" = "'Fira Code', 'JetBrainsMono Nerd Font'";
+        "editor.fontWeight" = "Regular";
         "editor.fontLigatures" = true;
+        "editor.fontSize" = 14;
+
+        "terminal.integrated.fontFamily" = "'Fira Code', 'JetBrainsMono Nerd Font'";
+        "terminal.integrated.fontWeight" = "Regular";
+        "terminal.integrated.fontLigatures" = true;
+        "terminal.integrated.fontSize" = 14;
+
         "docker.extension.experimental.composeCompletions" = true;
         "workbench.activityBar.orientation" = "vertical";
         "vim.handleKeys" = {

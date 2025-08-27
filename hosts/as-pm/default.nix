@@ -140,6 +140,7 @@
         claude-code
         bitwarden-desktop
         x2goclient
+        pre-commit
       ];
 
       xsession.windowManager.i3.config = lib.mkMerge [
