@@ -21,6 +21,7 @@
         kc = "kubectl";
         kd = "kubectl describe";
         kf = "kubectl get pods -o wide";
+        nix-shell = "nix-shell --run fish";
       };
   };
 

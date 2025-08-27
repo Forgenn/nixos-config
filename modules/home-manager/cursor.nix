@@ -52,7 +52,6 @@
         jnoortheen.nix-ide
         vscodevim.vim
         enkia.tokyo-night
-        google.gemini-cli-vscode-ide-companion
         # Unavaible nixos, install
         #monokai.theme-monokai-pro-vscode
       ];
