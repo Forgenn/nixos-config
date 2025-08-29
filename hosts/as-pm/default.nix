@@ -107,6 +107,7 @@
         (self + "/modules/home-manager/base.nix")
         (self + "/modules/home-manager/i3.nix")
         (self + "/modules/home-manager/cursor.nix")
+        (self + "/modules/home-manager/zed.nix")
       ];
 
       home.packages = with pkgs; [
@@ -115,7 +116,6 @@
         ghostty
         starship
         code-cursor
-        zed-editor
         vscode
         pkgs.unstable.deskflow
         uv
@@ -141,6 +141,7 @@
         bitwarden-desktop
         x2goclient
         pre-commit
+        nix-prefetch
       ];
 
       xsession.windowManager.i3.config = lib.mkMerge [

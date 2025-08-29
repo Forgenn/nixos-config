@@ -117,7 +117,7 @@
           user = "ntb";
           extraModules = [ ./modules/nixos/desktop.nix ];
         };
-        
+
         ############################
         # Revachol cluster nodes
         ############################
