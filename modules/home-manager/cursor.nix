@@ -30,12 +30,12 @@
         "terminal.integrated.defaultProfile.linux" = "fish";
 
         # use Fira Code with JetBrainsMono Nerd Font as fallback for icons
-        "editor.fontFamily" = "'Fira Code', 'JetBrainsMono Nerd Font'";
+        "editor.fontFamily" = "'Berkeley Mono Trial', 'JetBrainsMono Nerd Font'";
         "editor.fontWeight" = "Regular";
         "editor.fontLigatures" = true;
         "editor.fontSize" = 14;
 
-        "terminal.integrated.fontFamily" = "'Fira Code', 'JetBrainsMono Nerd Font'";
+        "terminal.integrated.fontFamily" = "'Berkeley Mono Trial', 'JetBrainsMono Nerd Font'";
         "terminal.integrated.fontWeight" = "Regular";
         "terminal.integrated.fontLigatures" = true;
         "terminal.integrated.fontSize" = 14;
