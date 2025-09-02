@@ -1,15 +1,13 @@
 { pkgs, ... }:
 {
 
-    programs.vim = {
+    programs.neovim = {
     enable = true;
-    plugins = with pkgs.vimPlugins; [ vim-airline dracula-vim];
+    vimAlias = true;
+    viAlias = true;
+    plugins = with pkgs.vimPlugins; [ tokyonight-nvim vim-airline dracula-vim nvim-treesitter vim-surround];
     extraConfig = ''
-      colorscheme dracula
+      colorscheme tokyonight-storm
     '';
-    settings = { 
-      ignorecase = true;
-      copyindent= true; 
-    };
   };
 }
