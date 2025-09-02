@@ -12,7 +12,7 @@ stdenvNoCC.mkDerivation (finalAttrs: {
 
   src = requireFile rec {
     name = "${finalAttrs.pname}-${variant}-${finalAttrs.version}.zip";
-    sha256 = "113d1lrrrdmaygfsnb9pi1i00vjrs3mb22gsj9lj8i4zkw6m18s2";
+    sha256 = "1kcdja88xwjsl4w3x1sxpfv9gyyl54qgahn5zwi0cpkwk5xldil5";
     message = ''
       This file needs to be manually downloaded from the Berkeley Graphics
       site (https://berkeleygraphics.com/accounts). An email will be sent to
@@ -25,6 +25,8 @@ stdenvNoCC.mkDerivation (finalAttrs: {
 
       mv \$PWD/berkeley-mono-typeface.zip \$PWD/${name}
       nix-prefetch-url --type sha256 file://\$PWD/${name}
+      If you want nerd fonts:
+      nerd-font-patcher -c ${name}
     '';
   };
 
@@ -39,12 +41,8 @@ stdenvNoCC.mkDerivation (finalAttrs: {
   installPhase = ''
     runHook preInstall
 
-    fontDir=$(find . -type d -name 'TX-02-L0183W0Z' -print -quit)
-    if [ -z "$fontDir" ]; then
-      echo "Could not find font directory TX-02-L0183W0Z"
-      exit 1
-    fi
-    install -D -m444 -t $out/share/fonts/truetype "$fontDir"/*.ttf
+    mkdir -p $out/share/fonts/truetype
+    find . -name "*.ttf" -exec install -m444 -t $out/share/fonts/truetype {} +
 
     runHook postInstall
   '';

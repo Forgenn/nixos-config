@@ -28,14 +28,16 @@
         };
         "terminal.external.linuxExec" = "ghostty";
         "terminal.integrated.defaultProfile.linux" = "fish";
-
+        
         # use Fira Code with JetBrainsMono Nerd Font as fallback for icons
-        "editor.fontFamily" = "'Berkeley Mono Trial', 'JetBrainsMono Nerd Font'";
+        #"editor.fontFamily" = "'BerkeleyMonoTrial Nerd Font', 'JetBrainsMono Nerd Font'";
+        "editor.fontFamily" = "'BerkeleyMonoTrial Nerd Font'";
         "editor.fontWeight" = "Regular";
         "editor.fontLigatures" = true;
         "editor.fontSize" = 14;
 
-        "terminal.integrated.fontFamily" = "'Berkeley Mono Trial', 'JetBrainsMono Nerd Font'";
+        #"terminal.integrated.fontFamily" = "'BerkeleyMonoTrial Nerd Font', 'JetBrainsMono Nerd Font'";
+        "terminal.integrated.fontFamily" = "'BerkeleyMonoTrial Nerd Font'";
         "terminal.integrated.fontWeight" = "Regular";
         "terminal.integrated.fontLigatures" = true;
         "terminal.integrated.fontSize" = 14;

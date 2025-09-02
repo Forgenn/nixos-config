@@ -23,16 +23,36 @@
           ];
         };
       };
-      font_family = "JetBrains Mono";
-      font_size = 10;
+      buffer_font_family = "BerkeleyMonoTrial Nerd Font";
+      buffer_font_fallbacks = [ "BerkeleyMonoTrial Nerd Font" ];
+      buffer_font_size = 10;
+
+      ui_font_size = 10;
+      ui_font_fallbacks = [ "BerkeleyMonoTrial Nerd Font" ];
+
       theme = {
         light = "One Light";
         dark = "Tokyo Night Storm";
         mode = "system";
       };
-      ui_font_size = 10;
+
       vim_mode = true;
       #wrap_guides = [ 80 ];
+      terminal = {
+        copy_on_select = true;
+        shell = {program = "fish";};
+        font_family = "BerkeleyMonoTrial Nerd Font";
+        font_features = {
+          "calt" =  false;
+        };
+        line_height = "standard";
+      };
+      minimap = {
+        show = "always";
+        thumb = "always";
+        thumb_border = "left_open";
+        current_line_highlight = null;
+      };
     };
 
     userKeymaps = [

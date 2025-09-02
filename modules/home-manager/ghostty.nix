@@ -4,8 +4,9 @@
     enable = true;
     enableFishIntegration = true;
     settings = {
-      theme = "Dracula";
-      font-family = "Fira Code";
+      theme = "tokyonight-storm";
+      #theme = "Dracula";
+      font-family = "BerkeleyMonoTrial Nerd Font";
       background-opacity = 0.95;
       background-blur = 40;
       shell-integration = "fish";

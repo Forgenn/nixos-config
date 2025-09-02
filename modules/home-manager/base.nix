@@ -6,5 +6,6 @@
   imports = [
     ./nh.nix
     ./btop.nix
+    ./vim.nix
   ];
 }
