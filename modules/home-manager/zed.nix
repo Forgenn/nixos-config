@@ -30,6 +30,8 @@
       ui_font_size = 10;
       ui_font_fallbacks = [ "BerkeleyMonoTrial Nerd Font" ];
 
+      agent_font_size = 12;
+
       theme = {
         light = "One Light";
         dark = "Tokyo Night Storm";
@@ -43,7 +45,7 @@
         shell = {program = "fish";};
         font_family = "BerkeleyMonoTrial Nerd Font";
         font_features = {
-          "calt" =  false;
+          "calt" =  true;
         };
         line_height = "standard";
       };

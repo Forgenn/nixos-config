@@ -16,6 +16,7 @@
         gl = "git log --oneline --graph --decorate";
         gp = "git push";
         gpf = "git push --force";
+        gsp = "git stash pop";
         gup = "git pull --rebase";
         k = "kubectl";
         kc = "kubectl";

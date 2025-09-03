@@ -109,6 +109,7 @@
         (self + "/modules/home-manager/i3.nix")
         (self + "/modules/home-manager/cursor.nix")
         (self + "/modules/home-manager/zed.nix")
+        (self + "/modules/home-manager/k9s.nix")
       ];
 
       home.packages = with pkgs; [
@@ -130,7 +131,6 @@
         nil
         opentofu
         kubernetes-helm
-        k9s
         kubectl
         (pkgs.google-cloud-sdk.withExtraComponents [
           pkgs.google-cloud-sdk.components.gke-gcloud-auth-plugin

@@ -7,7 +7,8 @@
       theme = "tokyonight-storm";
       #theme = "Dracula";
       font-family = "BerkeleyMonoTrial Nerd Font";
-      font-features = "calt";
+      font-feature = "calt";
+      font-size = "12";
       background-opacity = 0.95;
       background-blur = 40;
       shell-integration = "fish";

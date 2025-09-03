@@ -3,8 +3,7 @@
   description = "My NixOS configurations for multiple hosts";
 
   inputs = {
-    # Nixpkgs (stable or unstable, choose one)
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05"; # Or nixos-23.11, etc.
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
     nixpkgs-unstable.url = "nixpkgs/nixos-unstable";
     # Home Manager
     home-manager = {
@@ -14,6 +13,14 @@
     agenix = {
       url = "github:ryantm/agenix";
       inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    # theming
+    base16.url = "github:SenchoPens/base16.nix";
+
+    tt-schemes = {
+      url = "github:tinted-theming/schemes";
+      flake = false;
     };
 
     # Add other flake inputs here if needed (e.g., overlays, specific apps)
@@ -27,6 +34,8 @@
       home-manager,
       nixpkgs-unstable,
       agenix,
+      base16,
+      tt-schemes,
       ...
     }@inputs:
     let
@@ -58,7 +67,11 @@
             opensshActualPatchFile = ./patches/openssh-nix-dont-checkperm.patch;
           };
 
+          # Add modules/inputs
           modules = [
+            base16.nixosModule
+
+            { scheme = "${inputs.tt-schemes}/base16/tokyo-night-terminal-storm.yaml"; }
             # Enable access to unstable packages
             (
               { config, pkgs, ... }:
