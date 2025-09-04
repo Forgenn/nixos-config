@@ -69,9 +69,7 @@
 
           # Add modules/inputs
           modules = [
-            base16.nixosModule
-
-            { scheme = "${inputs.tt-schemes}/base16/tokyo-night-terminal-storm.yaml"; }
+            base16.homeManagerModule
             # Enable access to unstable packages
             (
               { config, pkgs, ... }:
