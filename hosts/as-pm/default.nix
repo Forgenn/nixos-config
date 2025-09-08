@@ -79,7 +79,7 @@
   fonts.packages = with pkgs; [
     fira-code
     fira-code-symbols
-    (pkgs.callPackage ../../packages/berkeley-mono.nix { variant = "trial"; })
+    (pkgs.callPackage ../../packages/berkeley-mono.nix { variant = "nerd"; })
   ];
 
   # Needed to make some programs work (remote vscode)

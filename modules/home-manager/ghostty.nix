@@ -6,7 +6,7 @@
     settings = {
       theme = "tokyonight-storm";
       #theme = "Dracula";
-      font-family = "BerkeleyMonoTrial Nerd Font";
+      font-family = "BerkeleyMono Nerd Font";
       font-feature = "calt";
       font-size = "12";
       background-opacity = 0.95;

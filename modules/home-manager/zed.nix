@@ -23,12 +23,12 @@
           ];
         };
       };
-      buffer_font_family = "BerkeleyMonoTrial Nerd Font";
-      buffer_font_fallbacks = [ "BerkeleyMonoTrial Nerd Font" ];
+      buffer_font_family = "BerkeleyMono Nerd Font";
+      buffer_font_fallbacks = [ "BerkeleyMono Nerd Font" ];
       buffer_font_size = 10;
 
       ui_font_size = 10;
-      ui_font_fallbacks = [ "BerkeleyMonoTrial Nerd Font" ];
+      ui_font_fallbacks = [ "BerkeleyMono Nerd Font" ];
 
       agent_font_size = 12;
 
@@ -43,7 +43,7 @@
       terminal = {
         copy_on_select = true;
         shell = {program = "fish";};
-        font_family = "BerkeleyMonoTrial Nerd Font";
+        font_family = "BerkeleyMono Nerd Font";
         font_features = {
           "calt" =  true;
         };
