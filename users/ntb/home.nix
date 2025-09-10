@@ -27,12 +27,6 @@
     addKeysToAgent = "yes";
   };
 
-  programs.git = {
-    enable = true;
-    userName = "ntb";
-    userEmail = "pol.monedero@aistechspace.com";
-  };
-
   # This value determines the Home Manager release that the
   # configuration is compatible with. This helps avoid breakage
   # when receiving updates. It's recommended to set this value.

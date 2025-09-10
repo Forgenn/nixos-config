@@ -195,6 +195,15 @@
         }
       ];
 
+      programs.git = {
+        enable = true;
+        userName = "ntb";
+        userEmail = "pol.monedero@aistechspace.com";
+        extraConfig = {
+          url."git@github.com:aistechspace/".insteadOf = [ "https://github.com/aistechspace/" ];
+        };
+      };
+
       programs.ssh.extraConfig = ''
         Host github.com
            Hostname github.com

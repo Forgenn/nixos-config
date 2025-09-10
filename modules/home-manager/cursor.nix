@@ -34,13 +34,13 @@
         "editor.fontFamily" = "'BerkeleyMono Nerd Font', 'JetBrainsMono Nerd Font'";
         "editor.fontWeight" = "Regular";
         "editor.fontLigatures" = true;
-        "editor.fontSize" = 14;
+        "editor.fontSize" = 16;
 
         "terminal.integrated.fontFamily" = "'BerkeleyMono Nerd Font', 'JetBrainsMono Nerd Font'";
         #"terminal.integrated.fontFamily" = "' BerkeleyMono Nerd Font Mono'";
         "terminal.integrated.fontWeight" = "Regular";
         "terminal.integrated.fontLigatures" = true;
-        "terminal.integrated.fontSize" = 14;
+        "terminal.integrated.fontSize" = 16;
 
         "docker.extension.experimental.composeCompletions" = true;
         "workbench.activityBar.orientation" = "vertical";
