@@ -33,17 +33,16 @@
   ];
 
   boot.kernelModules = [
-  "ip_vs"
-  "ip_vs_rr" # Round Robin scheduler
-  "ip_vs_wrr" # Weighted Round Robin scheduler
-  "ip_vs_sh" # Source Hashing scheduler
-  "nf_conntrack" # Required by IPVS
+    "ip_vs"
+    "ip_vs_rr" # Round Robin scheduler
+    "ip_vs_wrr" # Weighted Round Robin scheduler
+    "ip_vs_sh" # Source Hashing scheduler
+    "nf_conntrack" # Required by IPVS
   ];
 
   boot.kernel.sysctl = {
     "net.ipv4.conf.all.arp_filter" = 0;
 
-    
     "net.ipv4.conf.all.route_localnet" = 1;
     "net.ipv4.conf.enp2s0.route_localnet" = 1; # Also set it on the specific interface
 
@@ -140,6 +139,9 @@
     nixd
     nixfmt-rfc-style
     kubernetes-helm
+    # for longhorn
+    cryptsetup
+    lvm2_vdo
   ];
 
   # Enable the OpenSSH daemon.
@@ -150,6 +152,23 @@
   # Important to enable rpcbind for kubernetes NFS PVC mounting
   services.rpcbind.enable = true;
 
+  # For longhorn
+  services.openiscsi = {
+    enable = true;
+    name = "longhorn";
+  };
+  boot.supportedFilesystems = [ "nfs" ];
+  services.nfs.server = {
+    enable = true;
+    extraNfsdConfig = ''
+      rdma = true # Remote Direct Memory Access
+      vers3 = false
+      vers4 = true
+      vers4.0 = false
+      vers4.1 = false
+      vers4.2 = true
+    '';
+  };
   # Configure git to use the decrypted github_node_key for SSH
   programs.ssh = {
     extraConfig = ''
