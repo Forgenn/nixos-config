@@ -155,8 +155,22 @@
   # For longhorn
   services.openiscsi = {
     enable = true;
-    name = "longhorn";
+    name = "${config.networking.hostName}-initiatorhost";
   };
+
+  # Longhorn (specifically nsenter) expects the necessary binaries in /bin.
+  # so we bind the binaries to path (https://github.com/longhorn/longhorn/issues/2166)
+  systemd.services.iscsid.serviceConfig = {
+    PrivateMounts = "yes";
+    BindPaths = "/run/current-system/sw/bin:/bin";
+  };
+
+  # same as above
+  systemd.tmpfiles.rules = [
+    # Create a symbolic link /usr/bin/mount -> /run/current-system/sw/bin/mount
+    "L /usr/bin/mount - - - - /run/current-system/sw/bin/mount"
+  ];
+
   boot.supportedFilesystems = [ "nfs" ];
   services.nfs.server = {
     enable = true;
