@@ -31,7 +31,7 @@ let
       shareStrategy: "setDatasetProperties"
       shareStrategySetDatasetProperties:
         properties:
-          sharenfs: "rw,no_root_squash"
+          sharenfs: "rw=@dubois.home,rw=@cuno.home,rw=@katsuragi.home,insecure,no_subtree_check,no_root_squash"
       shareHost: "dolores.home"
   '';
 in
