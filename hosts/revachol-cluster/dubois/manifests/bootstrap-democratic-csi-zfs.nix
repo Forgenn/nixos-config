@@ -33,6 +33,9 @@ let
         properties:
           sharenfs: "rw=@dubois.home,rw=@cuno.home,rw=@katsuragi.home,insecure,no_subtree_check,no_root_squash"
       shareHost: "dolores.home"
+      mountOptions:
+        - vers=4.2
+        - noatime
   '';
 in
 {

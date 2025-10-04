@@ -10,6 +10,21 @@
 {
   imports = [ ];
 
+  # From 6.12.44, nfs xattrs is broken (https://bbs.archlinux.org/viewtopic.php?id=307804)
+  # Fixed in 6.17.0, which at the moment is not deployed  in nixpkgs, so compile from source
+  boot.kernelPackages = pkgs.linuxPackagesFor (
+    pkgs.linux_6_16.override {
+      argsOverride = rec {
+        src = pkgs.fetchurl {
+          url = "mirror://kernel/linux/kernel/v6.x/linux-${version}.tar.xz";
+          sha256 = "sha256-m2BxZqHJmdgyYJgSEiL+sICiCjJTl1/N+i3pa6f3V6c=";
+        };
+        version = "6.17";
+        modDirVersion = "6.17.0";
+      };
+    }
+  );
+
   # Locale configuration
   i18n = {
     supportedLocales = [
@@ -142,6 +157,9 @@
     # for longhorn
     cryptsetup
     lvm2_vdo
+    # nfs test
+    acl
+    nfs-utils
   ];
 
   # Enable the OpenSSH daemon.
@@ -171,13 +189,14 @@
     "L /usr/bin/mount - - - - /run/current-system/sw/bin/mount"
   ];
 
+  boot.blacklistedKernelModules = [ "nfsv3" ];
   boot.supportedFilesystems = [ "nfs" ];
   services.nfs.server = {
-    enable = true;
+    enable = false;
     extraNfsdConfig = ''
-      rdma = true # Remote Direct Memory Access
+      rdma = false # Remote Direct Memory Access
       vers3 = false
-      vers4 = true
+      vers4 = false
       vers4.0 = false
       vers4.1 = false
       vers4.2 = true
