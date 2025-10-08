@@ -25,6 +25,41 @@
     }
   );
 
+  # Shut down cluster at 1 in the morning, wake up at certain times depending on the day
+  systemd.services."rtcwake-weekdays" = {
+    description = "Suspending the system on weekdays";
+    serviceConfig = {
+      Type = "oneshot";
+      ExecStart = "${pkgs.util-linux}/bin/rtcwake -m off -s 19080";
+    };
+  };
+
+  systemd.timers."rtcwake-weekdays" = {
+    description = "Run rtcwake at 1 AM on weekdays";
+    wantedBy = [ "timers.target" ];
+    timerConfig = {
+      OnCalendar = "Mon..Fri 01:00:00";
+      Persistent = true;
+    };
+  };
+
+  systemd.services."rtcwake-weekends" = {
+    description = "Suspending the system on weekends";
+    serviceConfig = {
+      Type = "oneshot";
+      ExecStart = "${pkgs.util-linux}/bin/rtcwake -m off -s 28800";
+    };
+  };
+
+  systemd.timers."rtcwake-weekends" = {
+    description = "Run rtcwake at 1 AM on weekends";
+    wantedBy = [ "timers.target" ];
+    timerConfig = {
+      OnCalendar = "Sat,Sun 01:00:00";
+      Persistent = true;
+    };
+  };
+
   # Locale configuration
   i18n = {
     supportedLocales = [
