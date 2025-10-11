@@ -81,6 +81,15 @@ in
                   "/spec/template/metadata/annotations/updatedAt"
                 ];
               }
+              {
+                group = "external-secrets.io";
+                kind = "ExternalSecret";
+                jsonPointers = [
+                  "/spec/conversionStrategy"
+                  "/spec/decodingStrategy"
+                  "/spec/metadataPolicy"
+                ];
+              }
             ];
           };
         };
