@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, config, ... }:
 let
   # When using easyCerts=true the IP Address must resolve to the master on creation.
   # So use simply 127.0.0.1 in that case. Otherwise you will have errors like this https://github.com/NixOS/nixpkgs/issues/59364
@@ -21,7 +21,7 @@ in
     enable = true;
     # Management AND node
     role = "agent";
-    tokenFile = ./secrets/k3s_token.age;
+    tokenFile = config.age.secrets.k3s_token.path;
     serverAddr = "https://" + kubeMasterHostname + ":" + (builtins.toString kubeMasterAPIServerPort);
     extraFlags = [
       # Enable ipvs
