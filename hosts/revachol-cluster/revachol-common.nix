@@ -170,7 +170,8 @@
       "docker"
     ];
     openssh.authorizedKeys.keys = [
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMlMp3gOmuiGEjtG7d/c7CIqQpId49EZoX5Nu1J6Pfuo"
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMlMp3gOmuiGEjtG7d/c7CIqQpId49EZoX5Nu1J6Pfuo" # ntb user
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOOVwSQAPzm403xgtVXkniuc3r8v16l9rFl5CBJH8zZs" # cfv@hatsum
     ];
     #packages = with pkgs; [ ];
   };
