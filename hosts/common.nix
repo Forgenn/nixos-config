@@ -14,8 +14,8 @@
   ];
 
   # Basic system setup
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
+  #boot.loader.systemd-boot.enable = true;
+  #boot.loader.efi.canTouchEfiVariables = true;
   networking.useDHCP = lib.mkDefault true;
 
   time.timeZone = "Europe/Madrid";

@@ -11,6 +11,7 @@
       "nngceckbapebfimnlniiiahkandclblb" # bitwarden
       "haipckejfdppjfblgondaakgckohcihp" # milk cookie manager
       "eifflpmocdbdmepbjaopkkhbfmdgijcc" # json pro viewer
+      "ddkjiahejlhfcafbddmgiahcphecmpfh" # ublock origin lite
     ];
   };
 }

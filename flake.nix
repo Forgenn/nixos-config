@@ -129,6 +129,15 @@
           extraModules = [ ./modules/nixos/desktop.nix ];
         };
 
+        ###############
+        # hatsum laptop
+        ###############
+        hatsum = mkNixosSystem {
+          system = "x86_64-linux";
+          device = "hatsum";
+          user = "cfv";
+        };
+
         ############################
         # Revachol cluster nodes
         ############################
