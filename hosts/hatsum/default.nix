@@ -18,6 +18,8 @@
   boot.loader.grub.useOSProber = lib.mkForce true;
   boot.loader.systemd-boot.enable = lib.mkForce false;
 
+  boot.plymouth.enable = true;
+  boot.plymouth.theme = "breeze";
 
   networking.hostName = "hatsum"; # Define your hostname.
 
@@ -30,10 +32,13 @@
 
 
   # GPU config
-  hardware.graphics.enable = true;
-  services.xserver.videoDrivers = [ "nvidia" ];
-  hardware.nvidia.open = false;
-  hardware.nvidia.powerManagement.enable = true;
+  hardware.graphics = {
+    enable = true;
+    enable32Bit = true;
+  };
+  services.xserver.videoDrivers = [ "amdgpu" ];
+  hardware.amdgpu.initrd.enable = true;
+  boot.initrd.kernelModules = [ "amdgpu" ];
 
   # Set your time zone.
   time.timeZone = "Europe/Madrid";
@@ -52,6 +57,8 @@
     LC_TELEPHONE = "es_ES.UTF-8";
     LC_TIME = "es_ES.UTF-8";
   };
+
+  i18n.supportedLocales = [ "en_US.UTF-8/UTF-8" "es_ES.UTF-8/UTF-8" "en_GB.UTF-8/UTF-8" ];
 
   # Enable the X11 windowing system.
   # You can disable this if you're only using the Wayland session.
@@ -101,13 +108,21 @@
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
 
+  programs.nix-ld.enable = true;
 
- programs.steam.enable = true;
+  programs.steam.enable = true;
+  programs.gamescope.enable = true;
+  programs.gamemode.enable = true;
+
   environment.systemPackages = with pkgs; [
     vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
     wget
-    heroic-unwrapped
+    heroic
+    umu-launcher
     chromium
+    gemini-cli
+    orca-slicer
+    discord
   ];
 
 # --- Home Manager ---
@@ -139,6 +154,12 @@
         ])
         bitwarden-desktop
       ];
+
+      # For orcaslicer bug
+      home.sessionVariables = {
+        _EGL_VENDOR_LIBRARY_FILENAMES = "/run/opengl-driver/share/glvnd/egl_vendor.d/50_mesa.json";
+        WEBKIT_DISABLE_DMABUF_RENDERER = "1";
+      };
 
       programs.zed-editor.userSettings.ui_font_size = lib.mkForce 18;
 
