@@ -25,6 +25,11 @@
   programs.ssh = {
     enable = true;
     addKeysToAgent = "yes";
+    extraConfig = ''
+      Host katsuragi.home dubois.home cuno.home
+        User ntb
+        IdentityFile ~/.ssh/id_ed25519
+    '';
   };
 
   # This value determines the Home Manager release that the

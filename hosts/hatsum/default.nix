@@ -28,15 +28,10 @@
   };
 
   fileSystems."/mnt/Helium" = {
-    device = "/dev/disk/by-uuid/A658B16D58B13D3D";
-    fsType = "ext4";
-    options = [
-      "nofail"
-      "defaults"
-      "uid=0"
-      "gid=${builtins.toString config.users.groups.storage.gid}"
-      "umask=007"
-    ];
+      device = "/dev/disk/by-uuid/2ea90fcc-3fbd-4c64-b220-3344eac0ce77";
+      fsType = "ext4";
+      options = [ "nofail" "defaults" ];
+      # "defaults" implies "exec", "rw", etc.
   };
 
 
@@ -125,11 +120,22 @@
   # Define a group for shared storage access
   users.groups.storage = { gid = 1002; };
 
+  # Enable the OpenSSH daemon.
+  services.openssh.enable = true;
+  # Temporary, remove once in
+  services.openssh.settings.PasswordAuthentication = true;
+  services.openssh.settings.X11Forwarding = true;
+
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.cfv = {
     isNormalUser = true;
     description = "cfv";
     extraGroups = [ "networkmanager" "wheel" "storage" ];
+
+    openssh.authorizedKeys.keys = [
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMlMp3gOmuiGEjtG7d/c7CIqQpId49EZoX5Nu1J6Pfuo" # ntb user
+    ];
+
     packages = with pkgs; [
       kdePackages.kate
     #  thunderbird
@@ -140,6 +146,11 @@
     isNormalUser = true;
     description = "mire";
     extraGroups = [ "networkmanager" "wheel" "storage" ];
+
+    openssh.authorizedKeys.keys = [
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMlMp3gOmuiGEjtG7d/c7CIqQpId49EZoX5Nu1J6Pfuo" # ntb user
+    ];
+
     packages = with pkgs; [
     ];
   };
