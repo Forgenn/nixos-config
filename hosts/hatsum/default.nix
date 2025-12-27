@@ -12,6 +12,34 @@
       ../../modules/nixos/chromium.nix
     ];
 
+  # --- Shared Storage Mounts ---
+  # Note: These options are for filesystems like NTFS/exFAT that don't
+  # support native Linux permissions.
+  fileSystems."/mnt/Hydrogen" = {
+    device = "/dev/disk/by-uuid/8042273542272F7A";
+    fsType = "ntfs";
+    options = [
+      "nofail"
+      "defaults"
+      "uid=0" # Owner is root
+      "gid=${builtins.toString config.users.groups.storage.gid}" # Group is our new 'storage' group
+      "umask=007" # Permissions: 770 for dirs, 660 for files
+    ];
+  };
+
+  fileSystems."/mnt/Helium" = {
+    device = "/dev/disk/by-uuid/A658B16D58B13D3D";
+    fsType = "ext4";
+    options = [
+      "nofail"
+      "defaults"
+      "uid=0"
+      "gid=${builtins.toString config.users.groups.storage.gid}"
+      "umask=007"
+    ];
+  };
+
+
   # Bootloader.
   boot.loader.grub.enable = lib.mkForce true;
   boot.loader.grub.device = lib.mkForce "/dev/sda";
@@ -94,19 +122,40 @@
   };
 
 
+  # Define a group for shared storage access
+  users.groups.storage = { gid = 1002; };
+
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.cfv = {
     isNormalUser = true;
     description = "cfv";
-    extraGroups = [ "networkmanager" "wheel" ];
+    extraGroups = [ "networkmanager" "wheel" "storage" ];
     packages = with pkgs; [
       kdePackages.kate
     #  thunderbird
     ];
   };
 
+  users.users.mire = {
+    isNormalUser = true;
+    description = "mire";
+    extraGroups = [ "networkmanager" "wheel" "storage" ];
+    packages = with pkgs; [
+    ];
+  };
+
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
+  # Enable agenix for secret decryption
+  age.identityPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
+
+  age.secrets.kubeconfig_revachol = {
+      file = ../secrets/kubeconfig_revachol.age;
+      mode = "600";
+      owner = "cfv";
+      group = "users";
+      path = "/home/cfv/.kube/config";
+    };
 
   programs.nix-ld.enable = true;
 
@@ -123,6 +172,7 @@
     gemini-cli
     orca-slicer
     discord
+    inputs.agenix.packages.${pkgs.system}.default
   ];
 
 # --- Home Manager ---
@@ -131,6 +181,7 @@
       pkgs,
       lib,
       self,
+      osConfig,
       ...
     }:
     {
@@ -143,6 +194,10 @@
         (self + "/modules/home-manager/btop.nix")
         (self + "/modules/home-manager/k9s.nix")
       ];
+
+      # secret symlinks
+      # home.file.".kube/config".source = config.lib.file.mkOutOfStoreSymlink osConfig.age.secrets.kubeconfig_revachol.path;
+
 
       home.packages = with pkgs; [
         starship

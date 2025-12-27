@@ -11,7 +11,7 @@ let
   users = [ ntbUserKey ];
 
   # Desktops
-  hatsumKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOZXSiOpUd9HKAKbY99u33M2zzwrvhKr0wBNXgK2S+b/ root@hatsum"
+  hatsumKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOZXSiOpUd9HKAKbY99u33M2zzwrvhKr0wBNXgK2S+b/ root@hatsum";
 
   desktopKeys = [
     hatsumKey
