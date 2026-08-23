@@ -23,4 +23,5 @@ in
 
   # Secret definitions
   "kubeconfig_revachol.age".publicKeys = desktopKeys;
+  "hermes_env.age".publicKeys = desktopKeys;
 }
