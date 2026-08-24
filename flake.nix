@@ -170,6 +170,17 @@
           isCluster = true;
           clusterNode = "katsuragi";
         };
+
+        ############################
+        # dolores — ZFS/NFS storage appliance for the Revachol cluster.
+        # Deliberately NOT isCluster: not a k3s node, not part of revachol-common.nix.
+        # See hosts/dolores/default.nix for why.
+        ############################
+        dolores = mkNixosSystem {
+          system = "x86_64-linux";
+          device = "dolores";
+          user = "ntb";
+        };
       };
 
       # homeConfigurations = {
