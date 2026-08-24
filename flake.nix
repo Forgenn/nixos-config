@@ -3,11 +3,13 @@
   description = "My NixOS configurations for multiple hosts";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
     nixpkgs-unstable.url = "nixpkgs/nixos-unstable";
+    # hermes agent
+    hermes-agent.url = "github:NousResearch/hermes-agent";
     # Home Manager
     home-manager = {
-      url = "github:nix-community/home-manager/release-25.05";
+      url = "github:nix-community/home-manager/release-26.05";
       inputs.nixpkgs.follows = "nixpkgs"; # Ensures HM uses the same nixpkgs
     };
     agenix = {
@@ -33,6 +35,7 @@
       nixpkgs,
       home-manager,
       nixpkgs-unstable,
+      hermes-agent,
       agenix,
       base16,
       tt-schemes,
@@ -88,6 +91,9 @@
 
             # Agenix module for secrets management
             agenix.nixosModules.default
+
+            # hermes agent
+            hermes-agent.nixosModules.default
 
             # Import host-specific configuration
             (

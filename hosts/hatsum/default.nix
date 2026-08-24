@@ -123,7 +123,7 @@
   # Enable the OpenSSH daemon.
   services.openssh.enable = true;
   # Temporary, remove once in
-  services.openssh.settings.PasswordAuthentication = true;
+  services.openssh.settings.PasswordAuthentication = lib.mkForce true;
   services.openssh.settings.X11Forwarding = true;
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
@@ -177,6 +177,8 @@
   environment.systemPackages = with pkgs; [
     vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
     wget
+    claude-code
+    pi-coding-agent
     heroic
     umu-launcher
     chromium
@@ -185,8 +187,12 @@
     discord
     inputs.agenix.packages.${pkgs.system}.default
   ];
+  age.secrets.hermes-env.file = ../secrets/hermes_env.age;
 
-# --- Home Manager ---
+  # Hermes agent is hosted in the CLUSTER (gitops-cluster/infra/hermes-agent);
+  # this laptop no longer runs a local agent/gateway. It only runs the desktop
+  # client, which connects to the remote agent at hermes.monederobox.dev.
+
   home-manager.users.${user} =
     {
       pkgs,
@@ -219,12 +225,17 @@
           pkgs.google-cloud-sdk.components.gke-gcloud-auth-plugin
         ])
         bitwarden-desktop
+        # Hermes desktop client — connects to the remote cluster agent.
+        (inputs.hermes-agent.packages.${pkgs.system}.desktop)
       ];
 
       # For orcaslicer bug
       home.sessionVariables = {
         _EGL_VENDOR_LIBRARY_FILENAMES = "/run/opengl-driver/share/glvnd/egl_vendor.d/50_mesa.json";
         WEBKIT_DISABLE_DMABUF_RENDERER = "1";
+        # Point Hermes Desktop at the cluster-hosted agent (override; first-time
+        # sign-in still happens once in Settings -> Gateways).
+        HERMES_DESKTOP_REMOTE_URL = "https://hermes.monederobox.dev";
       };
 
       programs.zed-editor.userSettings.ui_font_size = lib.mkForce 18;
