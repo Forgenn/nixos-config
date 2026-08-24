@@ -10,20 +10,11 @@
 {
   imports = [ ];
 
-  # From 6.12.44, nfs xattrs is broken (https://bbs.archlinux.org/viewtopic.php?id=307804)
-  # Fixed in 6.17.0, which at the moment is not deployed  in nixpkgs, so compile from source
-  boot.kernelPackages = pkgs.linuxPackagesFor (
-    pkgs.linux_6_16.override {
-      argsOverride = rec {
-        src = pkgs.fetchurl {
-          url = "mirror://kernel/linux/kernel/v6.x/linux-${version}.tar.xz";
-          sha256 = "sha256-m2BxZqHJmdgyYJgSEiL+sICiCjJTl1/N+i3pa6f3V6c=";
-        };
-        version = "6.17";
-        modDirVersion = "6.17.0";
-      };
-    }
-  );
+  # Previously pinned+compiled a custom 6.17 from source to work around an NFS xattr
+  # regression present from 6.12.44 onward (https://bbs.archlinux.org/viewtopic.php?id=307804).
+  # `linux_6_16` was removed from nixpkgs (EOL upstream) as of the 26.05 bump, and the fix
+  # has since landed upstream in-tree, so just take nixpkgs's default kernel again.
+  # boot.kernelPackages left unset = pkgs.linuxPackages (whatever 26.05 ships as current).
 
   #
   # Shutting down cluster makes pods not shut down correctly

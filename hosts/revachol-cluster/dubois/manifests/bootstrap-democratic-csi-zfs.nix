@@ -10,7 +10,12 @@ let
   driverConfigYamlWithPlaceholder = ''
     driver: zfs-generic-nfs
     sshConnection:
-      host: dolores.home
+      # Literal IP, not dolores.home — this is the one path in the whole cluster that
+      # must never depend on DNS being up (CSI controller crash-looped for months on
+      # ENOTFOUND here; see the migration report). nfs.shareHost below stays a hostname
+      # on purpose — that value is baked into every provisioned PV's volumeAttributes,
+      # so changing it would permanently split the PV population.
+      host: 192.168.1.34
       port: 22
       username: revachol-csi-user
       privateKey: |
