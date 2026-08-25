@@ -32,6 +32,20 @@
   networking.defaultGateway = "192.168.1.1";
   networking.nameservers = [ "1.1.1.1" "8.8.8.8" ];
 
+  # exportfs resolves every client hostname in /etc/exports at load time. Cluster's own
+  # CoreDNS now serves .home (see gitops-cluster infra/coredns), which means dolores
+  # exporting to dubois.home/cuno.home/katsuragi.home would silently fail to register
+  # whenever the cluster itself is down — confirmed live: exportfs -ra threw
+  # "Failed to resolve dubois.home" etc. while the cluster nodes were powered off during
+  # this migration, and only the one export using a raw IP actually loaded. Same class of
+  # bootstrap circular-dependency as the CSI controller's SSH target — same fix: pin
+  # statically, independent of any DNS resolver.
+  networking.hosts = {
+    "192.168.1.155" = [ "dubois.home" ];
+    "192.168.1.156" = [ "cuno.home" ];
+    "192.168.1.157" = [ "katsuragi.home" ];
+  };
+
   # Unlike revachol-common.nix, dolores gets a real firewall — it holds every
   # database in the homelab and NFS is no_root_squash.
   networking.firewall.enable = true;
