@@ -93,18 +93,47 @@
     nfs-utils
   ];
 
-  # No agenix here on purpose — dolores decrypts nothing today. The CSI SSH trust only
-  # needs revachol-csi-user's PUBLIC key (set in nfs.nix), which isn't a secret. See the
-  # migration report, Q5, for why dolores should stay out of the cluster's secrets.nix.
+  # Scoped agenix — dolores can decrypt exactly one secret (its own tailscale authkey,
+  # defined in hosts/secrets/secrets.nix alongside the desktop secrets, scoped to a
+  # separate recipient list so it can't decrypt hatsum's) and nothing from the cluster's
+  # secrets.nix (k3s_token, nas_node_key, etc). Was previously "no agenix at all"; see the
+  # migration report, Q5, for the original least-privilege reasoning, which still holds
+  # for every secret except this one.
+  age = {
+    identityPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
+    secretsDir = "/run/agenix";
+  };
 
-  # Tailscale for remote access. No authkey here (no agenix on this host, see above) —
-  # after deploy, run `sudo tailscale up --ssh --accept-dns=false` interactively once.
-  # --accept-dns=false is deliberate: this box's DNS setup is fragile enough already
-  # (see the .home CoreDNS migration saga) without Tailscale's MagicDNS also rewriting
-  # resolv.conf.
+  age.secrets.tailscale_authkey = {
+    file = ../secrets/dolores_tailscale_authkey.age;
+    mode = "600";
+    owner = "root";
+    group = "root";
+  };
+
+  # Tailscale for remote access. --accept-dns=false is deliberate: this box's DNS setup
+  # is fragile enough already (see the .home CoreDNS migration saga) without Tailscale's
+  # MagicDNS also rewriting resolv.conf.
   services.tailscale.enable = true;
   networking.firewall.trustedInterfaces = [ "tailscale0" ];
   networking.firewall.checkReversePath = "loose"; # tailscale's own recommendation
+
+  systemd.services.tailscale-autoconnect = {
+    description = "Automatic connection to Tailscale";
+    after = [ "network-online.target" "tailscale.service" ];
+    wants = [ "network-online.target" "tailscale.service" ];
+    wantedBy = [ "multi-user.target" ];
+    serviceConfig.Type = "oneshot";
+    script = ''
+      status="$(${pkgs.tailscale}/bin/tailscale status --json | ${pkgs.jq}/bin/jq -r .BackendState)"
+      if [ "$status" != "Running" ]; then
+        ${pkgs.tailscale}/bin/tailscale up \
+          --ssh \
+          --accept-dns=false \
+          --authkey "file:${config.age.secrets.tailscale_authkey.path}"
+      fi
+    '';
+  };
 
   # `nh os switch` instead of `sudo nixos-rebuild switch --flake /etc/nixos#dolores`.
   programs.nh = {
