@@ -126,9 +126,13 @@ in
       driver-config-file.yaml: $B64_CONTENT
     EOF
 
-        # Set permissions to 777
-        chmod 777 "$MANIFEST_FILE"
-        echo "Set permissions to 777 on $MANIFEST_FILE"
+        # Root-only -- this file contains the CSI controller's SSH private key in
+        # plaintext. Was chmod 777 (harmless only because the parent directory,
+        # /var/lib/rancher/k3s/server, is itself 700 root-only -- but that's relying on
+        # a coincidence, not a guarantee). k3s reads this as root, nothing else needs
+        # access to it.
+        chmod 600 "$MANIFEST_FILE"
+        echo "Set permissions to 600 on $MANIFEST_FILE"
 
         # Clean up temporary files
         rm -f "$KEY_FILE" "$YAML_FILE"
