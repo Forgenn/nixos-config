@@ -106,5 +106,11 @@
   networking.firewall.trustedInterfaces = [ "tailscale0" ];
   networking.firewall.checkReversePath = "loose"; # tailscale's own recommendation
 
+  # `nh os switch` instead of `sudo nixos-rebuild switch --flake /etc/nixos#dolores`.
+  programs.nh = {
+    enable = true;
+    flake = "/etc/nixos";
+  };
+
   system.stateVersion = lib.mkForce "25.05"; # fresh install — overrides common.nix's fleet default of 24.11
 }

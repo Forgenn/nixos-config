@@ -174,6 +174,14 @@
   };
 
   programs.nix-ld.enable = true;
+
+  # `nh os switch` instead of `sudo nixos-rebuild switch --flake /etc/nixos#<host>` —
+  # nicer diffs, generation cleanup. Flake path matches the fleet convention
+  # (every host's checkout now lives at /etc/nixos).
+  programs.nh = {
+    enable = true;
+    flake = "/etc/nixos";
+  };
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
