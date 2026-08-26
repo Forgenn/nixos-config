@@ -274,16 +274,16 @@
 
   boot.blacklistedKernelModules = [ "nfsv3" ];
   boot.supportedFilesystems = [ "nfs" ];
+  services.nfs.settings.nfsd = {
+    rdma = false; # Remote Direct Memory Access
+    vers3 = false;
+    vers4 = false;
+    "vers4.0" = false;
+    "vers4.1" = false;
+    "vers4.2" = true;
+  };
   services.nfs.server = {
     enable = false;
-    extraNfsdConfig = ''
-      rdma = false # Remote Direct Memory Access
-      vers3 = false
-      vers4 = false
-      vers4.0 = false
-      vers4.1 = false
-      vers4.2 = true
-    '';
   };
   # Configure git to use the decrypted github_node_key for SSH
   programs.ssh = {

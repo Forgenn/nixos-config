@@ -25,16 +25,17 @@ in
   boot.blacklistedKernelModules = [ "nfsv3" ];
   services.rpcbind.enable = true;
 
+  services.nfs.settings.nfsd = {
+    rdma = false;
+    vers3 = false;
+    vers4 = false;
+    "vers4.0" = false;
+    "vers4.1" = false;
+    "vers4.2" = true;
+  };
+
   services.nfs.server = {
     enable = true;
-    extraNfsdConfig = ''
-      rdma = false
-      vers3 = false
-      vers4 = false
-      vers4.0 = false
-      vers4.1 = false
-      vers4.2 = true
-    '';
     exports = lib.concatStringsSep "\n" (
       map (
         ds:
