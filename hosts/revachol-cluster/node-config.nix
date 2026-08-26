@@ -32,6 +32,13 @@ in
     extraFlags = [
       "--tls-san=${config.networking.hostName}.home,${kubeMasterHostname}"
 
+      # Was missing here despite being on dubois's master-k3s-config.nix -- as an agent,
+      # traefik/servicelb never mattered (server-only addons), but now that this node is
+      # a server too, k3s's own manifest auto-deploy tried to reintroduce them
+      # independently, causing helm-install-traefik CrashLoopBackOff cluster-wide right
+      # after the HA join (missing CRDs, since the real disable was never propagated here).
+      "--disable=traefik,servicelb"
+
       # Enable ipvs
       "--kube-proxy-arg=proxy-mode=ipvs"
       "--kube-proxy-arg=ipvs-strict-arp=true"
