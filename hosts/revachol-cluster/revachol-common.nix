@@ -209,6 +209,20 @@
     #packages = with pkgs; [ ];
   };
 
+  # Dedicated, deliberately non-privileged account for the in-cluster hermes-agent to
+  # SSH in as. No wheel, no docker -- key-only auth, no sudo. Can read logs/state, run
+  # kubectl (cluster RBAC is separately scoped to read-only via `view`), but can't touch
+  # the ZFS pool, can't rebuild NixOS, can't read other users' secrets or root-owned
+  # files. Same key across all 3 cluster nodes since it's one logical agent identity.
+  users.users.hermes-agent = {
+    isNormalUser = true;
+    description = "hermes-agent (in-cluster AI agent, restricted)";
+    extraGroups = [ ];
+    openssh.authorizedKeys.keys = [
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDqP4PADPm46nKG42mtxc2tpn4xeuNM9qjW+GWz4qqzT hermes-agent-fleet-ssh"
+    ];
+  };
+
   nixpkgs.config.allowUnfree = true;
 
   environment.systemPackages = with pkgs; [

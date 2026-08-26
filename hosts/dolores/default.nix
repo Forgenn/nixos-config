@@ -79,6 +79,18 @@
     ];
   };
 
+  # Dedicated, deliberately non-privileged account for the in-cluster hermes-agent to
+  # SSH in as. Same key/reasoning as revachol-common.nix -- no wheel, key-only, can read
+  # ZFS/NFS status for monitoring but can't touch the pool or exports.
+  users.users.hermes-agent = {
+    isNormalUser = true;
+    description = "hermes-agent (in-cluster AI agent, restricted)";
+    extraGroups = [ ];
+    openssh.authorizedKeys.keys = [
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDqP4PADPm46nKG42mtxc2tpn4xeuNM9qjW+GWz4qqzT hermes-agent-fleet-ssh"
+    ];
+  };
+
   security.sudo.wheelNeedsPassword = true;
 
   nixpkgs.config.allowUnfree = true;
