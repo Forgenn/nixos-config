@@ -92,9 +92,6 @@
             # Agenix module for secrets management
             agenix.nixosModules.default
 
-            # hermes agent
-            hermes-agent.nixosModules.default
-
             # Import host-specific configuration
             (
               if isCluster then
@@ -142,6 +139,10 @@
           system = "x86_64-linux";
           device = "hatsum";
           user = "cfv";
+          # Only hatsum actually uses this (the local desktop client, see
+          # hosts/hatsum/default.nix) -- was in the shared base module list, applying
+          # to every host in the fleet for no reason.
+          extraModules = [ hermes-agent.nixosModules.default ];
         };
 
         ############################
