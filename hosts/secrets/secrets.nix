@@ -24,7 +24,6 @@ let
   # Scoped per-secret below: dolores gets its own recipient list, NOT desktopKeys, so it
   # can't decrypt hatsum's kubeconfig/hermes_env and vice versa.
   doloresKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIN2CvtEnAPUh38NsFJd7rkesXiSD+dAAbJ0s0DY7DiUo root@nixos";
-  ntbUserKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOWhWoSOsaJrYl/srnSkU2riPA/yFCdFC3iZwvZ9Jjv+ node-deploy-key";
   doloresKeys = [ doloresKey ntbUserKey masterKey ];
 in
 {
