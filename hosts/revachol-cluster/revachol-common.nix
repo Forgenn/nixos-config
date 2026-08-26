@@ -143,6 +143,36 @@
     group = "users";
   };
 
+  age.secrets.tailscale_authkey = {
+    file = ./secrets/tailscale_authkey.age;
+    mode = "600";
+    owner = "root";
+    group = "root";
+  };
+
+  # Tailscale for remote access to the cluster. --accept-dns=false is deliberate: don't
+  # let MagicDNS rewrite resolv.conf on top of the LAN's own CoreDNS .home setup.
+  services.tailscale.enable = true;
+  networking.firewall.trustedInterfaces = [ "tailscale0" ];
+  networking.firewall.checkReversePath = "loose"; # tailscale's own recommendation
+
+  systemd.services.tailscale-autoconnect = {
+    description = "Automatic connection to Tailscale";
+    after = [ "network-online.target" "tailscale.service" ];
+    wants = [ "network-online.target" "tailscale.service" ];
+    wantedBy = [ "multi-user.target" ];
+    serviceConfig.Type = "oneshot";
+    script = ''
+      status="$(${pkgs.tailscale}/bin/tailscale status --json | ${pkgs.jq}/bin/jq -r .BackendState)"
+      if [ "$status" != "Running" ]; then
+        ${pkgs.tailscale}/bin/tailscale up \
+          --ssh \
+          --accept-dns=false \
+          --authkey "file:${config.age.secrets.tailscale_authkey.path}"
+      fi
+    '';
+  };
+
   programs.nix-ld.enable = true;
   # Bootloader.
   boot.loader.systemd-boot.enable = true;

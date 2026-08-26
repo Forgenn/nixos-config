@@ -97,5 +97,14 @@
   # needs revachol-csi-user's PUBLIC key (set in nfs.nix), which isn't a secret. See the
   # migration report, Q5, for why dolores should stay out of the cluster's secrets.nix.
 
+  # Tailscale for remote access. No authkey here (no agenix on this host, see above) —
+  # after deploy, run `sudo tailscale up --ssh --accept-dns=false` interactively once.
+  # --accept-dns=false is deliberate: this box's DNS setup is fragile enough already
+  # (see the .home CoreDNS migration saga) without Tailscale's MagicDNS also rewriting
+  # resolv.conf.
+  services.tailscale.enable = true;
+  networking.firewall.trustedInterfaces = [ "tailscale0" ];
+  networking.firewall.checkReversePath = "loose"; # tailscale's own recommendation
+
   system.stateVersion = lib.mkForce "25.05"; # fresh install — overrides common.nix's fleet default of 24.11
 }

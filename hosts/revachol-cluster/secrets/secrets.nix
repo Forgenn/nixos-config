@@ -31,5 +31,6 @@ in
   "nas_node_key.age".publicKeys = allKeys;
   "gitops_deploy_key.age".publicKeys = allKeys;
   "infisical_machine_creds_manifest.age".publicKeys = allKeys;
+  "tailscale_authkey.age".publicKeys = allKeys;
   # Add more secrets here, reusing allNodeKeys, allNodeAndUserKeys, or subsets as needed
 }
