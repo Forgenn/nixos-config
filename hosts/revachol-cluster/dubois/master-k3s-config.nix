@@ -82,7 +82,7 @@ in
       # Enable ipvs
       "--kube-proxy-arg=proxy-mode=ipvs"
       "--kube-proxy-arg=ipvs-strict-arp=true"
-    ];
+    ] ++ import ../k3s-leader-election-flags.nix;
 
     # K3s will write the manifests defined in democraticCsiConfig.manifests
     # to /var/lib/rancher/k3s/server/manifests/.

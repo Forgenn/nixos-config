@@ -19,14 +19,22 @@ in
 
   services.k3s = {
     enable = true;
-    # Management AND node
-    role = "agent";
+    # HA conversion: was "agent" (worker-only). Now "server" with no clusterInit (that's
+    # dubois's job, see master-k3s-config.nix) and serverAddr pointing at the existing
+    # cluster -- k3s's built-in join mechanism handles etcd membership automatically, no
+    # manual etcd surgery. Root motivation: dubois's single-member etcd meant its own
+    # disk stalls could take down the whole apiserver; a real 3-member quorum means a
+    # write only needs 2-of-3 acks, so one slow member (dubois) no longer single-handedly
+    # blocks the cluster the way it did before.
+    role = "server";
     tokenFile = config.age.secrets.k3s_token.path;
     serverAddr = "https://" + kubeMasterHostname + ":" + (builtins.toString kubeMasterAPIServerPort);
     extraFlags = [
+      "--tls-san=${config.networking.hostName}.home,${kubeMasterHostname}"
+
       # Enable ipvs
       "--kube-proxy-arg=proxy-mode=ipvs"
       "--kube-proxy-arg=ipvs-strict-arp=true"
-    ];
+    ] ++ import ./k3s-leader-election-flags.nix;
   };
 }
