@@ -24,6 +24,14 @@ let
     zfs:
       cli:
         sudoEnabled: true
+        # Absolute paths, not PATH lookups — democratic-csi's own default of
+        # /usr/bin/sudo etc. is an Ubuntu-ism left over from before the NixOS
+        # migration. Confirmed live via `which` on dolores: NixOS puts these
+        # under /run/wrappers and /run/current-system/sw, not /usr/*.
+        paths:
+          sudo: /run/wrappers/bin/sudo
+          zfs: /run/current-system/sw/bin/zfs
+          zpool: /run/current-system/sw/bin/zpool
       datasetParentName: revachol-pool/k8s-data/main
       detachedSnapshotsDatasetParentName: revachol-pool/k8s-data/snapshots
       datasetEnableQuotas: true
