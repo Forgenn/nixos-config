@@ -29,16 +29,12 @@
 
   services.zfs.trim.enable = false; # pool is spinning disks, not SSD — trim is a no-op/harmful here
 
-  # TODO: wire zed to ntfy once a notification token exists. Nobody currently gets paged on
-  # DEGRADED, checksum errors, or scrub failures — that gap is how the mirror sat DEGRADED
-  # unnoticed for ~5 months before this migration. Minimum viable version:
-  #
-  # services.zfs.zed.settings = {
-  #   ZED_EMAIL_ADDR = [ ];
-  #   ZED_NOTIFY_VERBOSE = true;
-  # };
-  # (or a custom zedlet posting to ntfy — see infra/ntfy in gitops-cluster for the existing
-  # topic/URL pattern used elsewhere in the cluster)
+  # Pool-health alerting: covered via Prometheus, not zed. node_exporter's ZFS collector
+  # (already enabled by default, see default.nix) exposes node_zfs_zpool_state; a
+  # PrometheusRule (gitops-cluster infra/monitoring/zfs-alerts.yaml) fires if the pool
+  # leaves ONLINE for 5+ minutes -- the exact condition that went unnoticed for ~5 months
+  # before this migration. ntfy is being deprecated in favor of Grafana/Alertmanager, so
+  # deliberately not wiring zed to it.
 
   # No swap on this box lives on a zvol — known deadlock source under memory pressure.
   # Swap, if any, should be a plain partition on the OS disk in hardware-configuration.nix.
