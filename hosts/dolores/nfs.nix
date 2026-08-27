@@ -67,8 +67,17 @@ in
   users.groups.revachol-csi-user.gid = 1003;
 
   # democratic-csi's driver config has sudoEnabled=true and expects passwordless zfs/zpool
-  # access for this user. Keep the permissive rule at cutover (matching current behavior);
-  # tightening to `zfs allow` delegation is real follow-up work, not part of this migration.
+  # access for this user. The `zfs allow` delegation half of narrowing this is DONE --
+  # revachol-csi-user now holds create,destroy,mount,snapshot,clone,promote,rollback,
+  # userprop,quota,reservation,refquota,refreservation,receive,send on revachol-pool/k8s-data
+  # (local+descendent, so it covers .../main and .../snapshots too). Deliberately NOT
+  # switching the driver config off sudoEnabled or narrowing this rule yet: Linux OpenZFS
+  # restricts mount/share to root regardless of delegation (kernel constraint, not a
+  # democratic-csi limitation), so this still needs `sudoEnabledCommands` scoped to just
+  # zfs mount/unmount/share/unshare -- untested against this deployment's actual
+  # democratic-csi version, and getting it wrong breaks cluster-wide PVC provisioning.
+  # Verify a real provision+delete cycle works under the narrowed config before touching
+  # this rule.
   security.sudo.extraRules = [
     {
       users = [ "revachol-csi-user" ];
