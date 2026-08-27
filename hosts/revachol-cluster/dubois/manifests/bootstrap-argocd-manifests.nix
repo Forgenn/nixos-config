@@ -132,6 +132,50 @@ in
     };
   };
 
+  kube-system-etcd-endpoints = {
+    enable = true;
+    # ArgoCD's argocd-cm ships (via the argo-helm chart's own defaults, not anything set
+    # in this repo) a hardcoded `resource.exclusions` list that drops Endpoints and
+    # EndpointSlice from every Application cluster-wide, to cut watch noise -- confirmed
+    # live: gitops-cluster's infra/kube-system-metrics-servicemonitors/kube-etcd.yaml
+    # defines a plain Endpoints object alongside its Service/ServiceMonitor, and ArgoCD's
+    # own sync result silently omits it (Service + both ServiceMonitors apply cleanly,
+    # Endpoints never appears in the result at all -- not an error, just excluded).
+    # Deployed here instead via k3s's manifest auto-deploy, the same mechanism already
+    # used for etcd_s3_backup_manifest/infisical_machine_creds_manifest in
+    # master-k3s-config.nix for the same class of reason: cluster plumbing that
+    # ArgoCD structurally cannot own. Static 3-node IP list, not label-selector-based
+    # (k3s's embedded etcd isn't a selectable pod), so this only needs to exist once,
+    # cluster-wide -- deployed from dubois (the clusterInit node) like the other two.
+    content = {
+      apiVersion = "v1";
+      kind = "Endpoints";
+      metadata = {
+        name = "kube-system-etcd";
+        namespace = "kube-system";
+        labels = {
+          "k8s-app" = "etcd-server";
+        };
+      };
+      subsets = [
+        {
+          addresses = [
+            { ip = "192.168.1.155"; } # dubois
+            { ip = "192.168.1.156"; } # cuno
+            { ip = "192.168.1.157"; } # katsuragi
+          ];
+          ports = [
+            {
+              name = "http-metrics";
+              port = 2381;
+              protocol = "TCP";
+            }
+          ];
+        }
+      ];
+    };
+  };
+
   argocd-repo-credentials-pat = {
     enable = true;
     content = {
