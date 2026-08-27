@@ -50,27 +50,36 @@
   # database in the homelab and NFS is no_root_squash.
   networking.firewall.enable = true;
   networking.firewall.allowedTCPPorts = [
-    22 # ssh
-    111 # rpcbind
-    2049 # nfsd
+    22 # ssh — stays LAN-wide, admin needs to reach this from anywhere
   ];
-  networking.firewall.allowedUDPPorts = [
-    111
-  ];
-  # TODO: once this is stable, tighten source ranges to the cluster node IPs only
-  # (192.168.1.155/.156/.157) via extraCommands / a proper allowedTCPPortRanges + IP set,
-  # rather than opening NFS to the whole LAN.
 
-  # node_exporter, scoped to just the 3 cluster nodes from the start (unlike NFS above,
+  # node_exporter, scoped to just the 3 cluster nodes from the start (unlike NFS below,
   # this is a fresh addition so no reason to open it LAN-wide). Prometheus in-cluster
   # scrapes it as a static target -- dolores isn't a k8s node, so the DaemonSet-based
   # node-exporter that covers dubois/cuno/katsuragi doesn't reach it.
   services.prometheus.exporters.node.enable = true;
   services.prometheus.exporters.node.enabledCollectors = [ "systemd" ];
+
+  # rpcbind/nfsd were previously LAN-wide (a TODO from the initial migration, now
+  # closed) despite only ever being consumed by the 3 cluster nodes -- NFS on a
+  # no_root_squash export is real exposure to leave open to the whole LAN. Scoped here
+  # alongside node_exporter's rules rather than the broad allowedTCPPorts/allowedUDPPorts
+  # above, which apply to all interfaces regardless of source.
   networking.firewall.extraCommands = ''
     iptables -A nixos-fw -p tcp -s 192.168.1.155 --dport 9100 -j nixos-fw-accept
     iptables -A nixos-fw -p tcp -s 192.168.1.156 --dport 9100 -j nixos-fw-accept
     iptables -A nixos-fw -p tcp -s 192.168.1.157 --dport 9100 -j nixos-fw-accept
+
+    iptables -A nixos-fw -p tcp -s 192.168.1.155 --dport 111 -j nixos-fw-accept
+    iptables -A nixos-fw -p tcp -s 192.168.1.156 --dport 111 -j nixos-fw-accept
+    iptables -A nixos-fw -p tcp -s 192.168.1.157 --dport 111 -j nixos-fw-accept
+    iptables -A nixos-fw -p udp -s 192.168.1.155 --dport 111 -j nixos-fw-accept
+    iptables -A nixos-fw -p udp -s 192.168.1.156 --dport 111 -j nixos-fw-accept
+    iptables -A nixos-fw -p udp -s 192.168.1.157 --dport 111 -j nixos-fw-accept
+
+    iptables -A nixos-fw -p tcp -s 192.168.1.155 --dport 2049 -j nixos-fw-accept
+    iptables -A nixos-fw -p tcp -s 192.168.1.156 --dport 2049 -j nixos-fw-accept
+    iptables -A nixos-fw -p tcp -s 192.168.1.157 --dport 2049 -j nixos-fw-accept
   '';
 
   boot.loader.systemd-boot.enable = true;
