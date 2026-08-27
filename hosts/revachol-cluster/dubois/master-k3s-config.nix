@@ -82,6 +82,18 @@ in
       # Enable ipvs
       "--kube-proxy-arg=proxy-mode=ipvs"
       "--kube-proxy-arg=ipvs-strict-arp=true"
+
+      # etcd snapshots were local-disk-only -- offload to the same Hetzner bucket used by
+      # every other backup here. Only --etcd-s3 and --etcd-s3-config-secret may be passed
+      # on the CLI alongside it -- any other --etcd-s3-* flag on the command line makes
+      # k3s ignore the Secret entirely, so bucket/endpoint/folder/creds all live in
+      # etcd-s3-backup-manifest.yaml (deployed above) instead. Applies to every server
+      # node independently (each takes its own local etcd member snapshot); this is the
+      # clusterInit node so it's also where the Secret gets deployed once, cluster-wide.
+      "--etcd-s3"
+      "--etcd-s3-config-secret=etcd-s3-backup-config"
+      "--etcd-snapshot-schedule-cron=0 */6 * * *"
+      "--etcd-snapshot-retention=10"
     ] ++ import ../k3s-leader-election-flags.nix;
 
     # K3s will write the manifests defined in democraticCsiConfig.manifests
@@ -98,6 +110,22 @@ in
         enable = true;
         source = config.age.secrets.infisical_machine_creds_manifest.path;
         target = "infisical_machine_creds_manifest.yaml";
+      };
+    }
+    {
+      # etcd snapshots were local-disk-only on each node -- a full node loss lost the
+      # snapshot too. Deployed via k3s's own manifest auto-deploy (like infisical's
+      # machine creds above) rather than an ArgoCD-managed ExternalSecret deliberately:
+      # etcd backup/restore is disaster-recovery tooling and shouldn't depend on the
+      # cluster machinery (ArgoCD, ExternalSecrets, Infisical connectivity) it exists to
+      # help recover *from*. Same Hetzner bucket/creds used by every other backup in this
+      # cluster, just a different folder. See k3s-leader-election-flags.nix's sibling
+      # files (master-k3s-config.nix / node-config.nix) for the --etcd-s3* flags that
+      # consume this secret.
+      etcd_s3_backup_manifest = {
+        enable = true;
+        source = config.age.secrets.etcd_s3_backup_manifest.path;
+        target = "etcd-s3-backup-manifest.yaml";
       };
     }
   ];

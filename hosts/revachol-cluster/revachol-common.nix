@@ -143,6 +143,13 @@
     group = "users";
   };
 
+  age.secrets.etcd_s3_backup_manifest = {
+    file = ./secrets/etcd_s3_backup_manifest.age;
+    mode = "600";
+    owner = "ntb";
+    group = "users";
+  };
+
   age.secrets.tailscale_authkey = {
     file = ./secrets/tailscale_authkey.age;
     mode = "600";

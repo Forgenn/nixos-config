@@ -42,6 +42,15 @@ in
       # Enable ipvs
       "--kube-proxy-arg=proxy-mode=ipvs"
       "--kube-proxy-arg=ipvs-strict-arp=true"
+
+      # etcd-s3-backup-config Secret is deployed once (cluster-wide) via dubois's k3s
+      # manifest auto-deploy -- see master-k3s-config.nix for the full explanation and
+      # secret provenance. Same flags here so this node's own local etcd member also
+      # snapshots to S3 independently.
+      "--etcd-s3"
+      "--etcd-s3-config-secret=etcd-s3-backup-config"
+      "--etcd-snapshot-schedule-cron=0 */6 * * *"
+      "--etcd-snapshot-retention=10"
     ] ++ import ./k3s-leader-election-flags.nix;
   };
 }
