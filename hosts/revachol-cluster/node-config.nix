@@ -39,6 +39,12 @@ in
       # after the HA join (missing CRDs, since the real disable was never propagated here).
       "--disable=traefik,servicelb"
 
+      # k3s does not serve etcd metrics on :2381 at all without this, regardless of how
+      # correctly the scrape side (Service/Endpoints/ServiceMonitor) is wired -- see
+      # gitops-cluster infra/kube-system-metrics-servicemonitors/kube-etcd.yaml, which
+      # points at this port on all 3 server nodes by static IP.
+      "--etcd-expose-metrics=true"
+
       # Enable ipvs
       "--kube-proxy-arg=proxy-mode=ipvs"
       "--kube-proxy-arg=ipvs-strict-arp=true"
