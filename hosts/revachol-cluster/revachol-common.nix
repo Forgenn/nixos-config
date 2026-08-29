@@ -240,67 +240,6 @@
   # Important to enable rpcbind for kubernetes NFS PVC mounting
   services.rpcbind.enable = true;
 
-  # Tailnet DNS listener so remote clients (notably Android — which has no OS-level
-  # per-domain resolver, so tailscaled's forwarder must dial the nameserver directly,
-  # and that dial does not consult subnet routes, see tailscale/tailscale#12027) can
-  # resolve the internal zones *.monederobox.dev and *.home. CoreDNS listens on the
-  # tailscale0 interface (each node serves its own 100.x tailnet IPv4 + fd7a IPv6) and
-  # forwards the internal zones to the cluster CoreDNS (192.168.1.200), everything else
-  # upstream. Point Tailscale split-DNS at THIS node's 100.x tailnet IP.
-  #
-  # Bind by INTERFACE name, not a hardcoded IP: CoreDNS binds all addrs on the interface
-  # at startup (IPv4+IPv6), and if tailscale0 is absent it fails to bind and
-  # Restart=always retries until tailscaled brings the interface up — a LOUD failure,
-  # unlike ip_nonlocal_bind which silently binds a nonexistent address and black-holes.
-  # This also removes the per-host IP map (no stale-IP risk on node re-add) and the
-  # ip_nonlocal_bind sysctl. (Bind-by-name needs on all server blocks sharing :53 to
-  # avoid listener contention — done below.)
-  services.coredns = {
-    enable = true;
-    config = ''
-      monederobox.dev:53 home:53 {
-        bind tailscale0
-        forward . 192.168.1.200
-        cache 30
-        errors
-      }
-
-      .:53 {
-        bind tailscale0
-        forward . 1.1.1.1 9.9.9.9
-        cache 300
-        errors
-      }
-    '';
-  };
-
-  # Order CoreDNS after tailscaled AND after the tailscale0 interface exists, otherwise
-  # on a cold boot CoreDNS loses the race (tailscaled creates tailscale0 asynchronously
-  # after auth/netmap) and fails its first start. The .device unit is what actually
-  # waits for the interface. startLimitIntervalSec=0 so Restart=always can retry forever
-  # without tripping the 5-per-10s start limit; deliberately NOT bindsTo tailscale0
-  # (that would stop CoreDNS when the interface is recreated, and a systemd stop isn't
-  # a restart → DNS could stay down).
-  systemd.services.coredns = {
-    after = [ "tailscaled.service" "sys-subsystem-net-devices-tailscale0.device" ];
-    wants = [ "tailscaled.service" ];
-    startLimitIntervalSec = 0;
-    serviceConfig = {
-      # The NixOS services.coredns module defaults Restart to "on-failure"; we need
-      # "always" (to survive the expected boot race waiting for tailscale0). mkForce
-      # wins over the module's own default.
-      Restart = lib.mkForce "always";
-      RestartSec = "5s";
-    };
-  };
-  # NOTE: firewall.enable is FALSE on these nodes, so this block evaluates to "apply
-  # nothing" today — but it is CORRECT config the moment anyone flips the firewall on,
-  # scoping DNS to the tailnet rather than silently leaving 53 open or closed. Keep it.
-  networking.firewall.interfaces."tailscale0" = {
-    allowedUDPPorts = [ 53 ];
-    allowedTCPPorts = [ 53 ];
-  };
-
   # For longhorn
   services.openiscsi = {
     enable = true;
