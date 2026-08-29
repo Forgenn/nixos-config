@@ -240,29 +240,54 @@
   # Important to enable rpcbind for kubernetes NFS PVC mounting
   services.rpcbind.enable = true;
 
-  # Tailnet DNS forwarder so remote clients (notably Android, which refuses a LAN-IP
-  # nameserver for split-DNS — issue tailscale/tailscale#1956) can resolve the internal
-  # zones *.monederobox.dev and *.home. dnsmasq listens on the node's tailnet (100.x)
-  # and LAN IPs and forwards those zones to the cluster CoreDNS (192.168.1.200),
-  # everything else upstream. Point Tailscale split-DNS at THIS node's 100.x tailnet IP.
-  services.dnsmasq = {
+  # Tailnet DNS listener so remote clients (notably Android — which has no OS-level
+  # per-domain resolver, so tailscaled's forwarder must dial the nameserver directly,
+  # and that dial does not consult subnet routes, see tailscale/tailscale#12027) can
+  # resolve the internal zones *.monederobox.dev and *.home. CoreDNS listens on the
+  # node's own 100.x tailnet address and forwards the internal zones to the cluster
+  # CoreDNS (192.168.1.200), everything else upstream. Point Tailscale split-DNS at
+  # THIS node's 100.x tailnet IP.
+  services.coredns = {
     enable = true;
-    settings = {
-      # Listen on the tailnet interface only — split-DNS clients query over Tailscale.
-      interface = [ "tailscale0" ];
-      bind-interfaces = true;
-      # forward the internal zones to the cluster CoreDNS
-      server = [
-        "/monederobox.dev/192.168.1.200"
-        "/home/192.168.1.200"
-        "1.1.1.1"
-        "8.8.8.8"
-      ];
-      no-resolv = true;
-      no-poll = true;
-      cache-size = 500;
-      local-ttl = 60;
+    config = let
+      # Each cluster node serves its own tailnet (100.x) address.
+      tailnetIP = {
+        dubois = "100.73.155.27";
+        cuno = "100.83.160.122";
+        katsuragi = "100.104.15.104";
+      }.${config.networking.hostName} or "100.64.0.0";
+    in ''
+      monederobox.dev:53 home:53 {
+        bind ${tailnetIP}
+        forward . 192.168.1.200
+        cache 30
+        errors
+      }
+
+      .:53 {
+        bind ${tailnetIP}
+        forward . 1.1.1.1 9.9.9.9
+        cache 300
+        errors
+      }
+    '';
+  };
+
+  # CoreDNS must be able to bind its 100.x address before tailscale0 exists at boot,
+  # and must only come up after tailscaled assigned the address.
+  boot.kernel.sysctl."net.ipv4.ip_nonlocal_bind" = 1;
+  systemd.services.coredns = {
+    after = [ "tailscaled.service" ];
+    wants = [ "tailscaled.service" ];
+    serviceConfig = {
+      Restart = "always";
+      RestartSec = "5s";
     };
+  };
+  # DNS is exposed ONLY on the tailnet interface — not on the LAN/WAN.
+  networking.firewall.interfaces."tailscale0" = {
+    allowedUDPPorts = [ 53 ];
+    allowedTCPPorts = [ 53 ];
   };
 
   # For longhorn
