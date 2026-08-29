@@ -8,7 +8,10 @@
 }:
 
 {
-  imports = [ ];
+  imports = [
+    # Shared Tailscale/subnet-router config (imported by cluster nodes + dolores).
+    ../../modules/nixos/tailscale.nix
+  ];
 
   # Previously pinned+compiled a custom 6.17 from source to work around an NFS xattr
   # regression present from 6.12.44 onward (https://bbs.archlinux.org/viewtopic.php?id=307804).
@@ -155,40 +158,6 @@
     mode = "600";
     owner = "root";
     group = "root";
-  };
-
-  # Tailscale for remote access to the cluster. --accept-dns=false is deliberate: don't
-  # let MagicDNS rewrite resolv.conf on top of the LAN's own CoreDNS .home setup.
-  services.tailscale.enable = true;
-  # IP forwarding: required for Tailscale to act as a subnet router (--advertise-routes
-  # below). Without it a remote client can join the tailnet but has no route back to the
-  # LAN, so it's NOT "as if physically present" (e.g. cannot reach the cluster's
-  # 192.168.1.200 Envoy/DNS LB from away). Advertising 192.168.1.0/24 makes Tailscale
-  # behave like WireGuard: enable it, and you're on the home LAN from anywhere.
-  # The 192.168.1.0/24 route must ALSO be approved in the Tailscale admin console
-  # (Machines -> node -> Edit route settings -> Approve) or on first `tailscale up`.
-  boot.kernel.sysctl = {
-    "net.ipv4.ip_forward" = "1";
-  };
-  networking.firewall.trustedInterfaces = [ "tailscale0" ];
-  networking.firewall.checkReversePath = "loose"; # tailscale's own recommendation
-
-  systemd.services.tailscale-autoconnect = {
-    description = "Automatic connection to Tailscale";
-    after = [ "network-online.target" "tailscale.service" ];
-    wants = [ "network-online.target" "tailscale.service" ];
-    wantedBy = [ "multi-user.target" ];
-    serviceConfig.Type = "oneshot";
-    script = ''
-      status="$(${pkgs.tailscale}/bin/tailscale status --json | ${pkgs.jq}/bin/jq -r .BackendState)"
-      if [ "$status" != "Running" ]; then
-        ${pkgs.tailscale}/bin/tailscale up \
-          --ssh \
-          --advertise-routes=192.168.1.0/24 \
-          --accept-dns=false \
-          --authkey "file:${config.age.secrets.tailscale_authkey.path}"
-      fi
-    '';
   };
 
   programs.nix-ld.enable = true;
