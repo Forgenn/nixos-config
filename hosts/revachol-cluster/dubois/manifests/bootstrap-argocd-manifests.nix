@@ -111,14 +111,42 @@ in
                 ];
               }
               {
-                # CNPG operator rewrites the Cluster CR's status continuously, so
-                # ArgoCD self-heal (without RespectIgnoreDifferences) thrash-loops on it.
-                # Ignore the operator-owned status only -- spec stays diffed so real
-                # config drift still surfaces.
+                # CNPG operator (admission webhook) defaults many Cluster spec fields at
+                # apply time that git never declares (enablePDB, failoverDelay, monitoring,
+                # postgresUID/GID, primaryUpdateMethod, probes, replicationSlots,
+                # smartShutdownTimeout, startDelay/stopDelay, switchoverDelay, bootstrap,
+                # affinity, logLevel, maxSyncReplicas/minSyncReplicas, imageName, ...).
+                # ArgoCD compares bare git YAML vs the fully-populated live object, so every
+                # webhook-defaulted field reads as drift -> the CNPG-backed apps stay
+                # OutOfSync despite being Healthy and correctly synced. Ignore status AND
+                # these operator-defaulted spec fields. Real user-set config (instances,
+                # resources, storage, backup) is NOT ignored, so genuine drift still surfaces.
                 group = "postgresql.cnpg.io";
                 kind = "Cluster";
-                jqPathExpressions = [
-                  ".status"
+                jsonPointers = [
+                  "/status"
+                  "/metadata/annotations"
+                  "/spec/affinity"
+                  "/spec/bootstrap"
+                  "/spec/enablePDB"
+                  "/spec/enableSuperuserAccess"
+                  "/spec/failoverDelay"
+                  "/spec/imageName"
+                  "/spec/logLevel"
+                  "/spec/maxSyncReplicas"
+                  "/spec/minSyncReplicas"
+                  "/spec/monitoring"
+                  "/spec/postgresGID"
+                  "/spec/postgresUID"
+                  "/spec/postgresql"
+                  "/spec/primaryUpdateMethod"
+                  "/spec/primaryUpdateStrategy"
+                  "/spec/probes"
+                  "/spec/replicationSlots"
+                  "/spec/smartShutdownTimeout"
+                  "/spec/startDelay"
+                  "/spec/stopDelay"
+                  "/spec/switchoverDelay"
                 ];
               }
               {
