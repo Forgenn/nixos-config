@@ -43,18 +43,20 @@
       wantedBy = [ "multi-user.target" ];
       serviceConfig.Type = "oneshot";
       script = ''
-        status="$(${tailscale} status --json | ${pkgs.jq}/bin/jq -r .BackendState)"
-        if [ "$status" != "Running" ]; then
-          ${tailscale} up \
-            --ssh \
-            --advertise-routes=192.168.1.0/24 \
-            --accept-dns=false \
-            --authkey "file:${config.age.secrets.tailscale_authkey.path}"
-        fi
+        # Always run `tailscale up` regardless of whether tailscaled is already
+        # "Running". Re-running `up` is idempotent and (re)applies the advertised
+        # routes + options; the authkey is only consumed on the initial login.
+        # Previously this was gated on `status != Running`, but tailscaled usually
+        # reaches Running before this oneshot runs, so the --advertise-routes never
+        # got applied -> AdvertiseRoutes stayed null and the subnet router was silent
+        # despite the build being correct (seen on dolores, 2026-08-29: ip_forward=1
+        # but AdvertiseRoutes:null). Guarding on Running created a silent race.
+        ${tailscale} up \
+          --ssh \
+          --advertise-routes=192.168.1.0/24 \
+          --accept-dns=false \
+          --authkey "file:${config.age.secrets.tailscale_authkey.path}"
       '';
-      # Always re-run on boot/start so the route re-advertises even if tailscaled
-      # is already Running but not yet advertising routes (e.g. after a Tailscale
-      # config change or an interrupted first up).
       restartIfChanged = true;
     };
 }
