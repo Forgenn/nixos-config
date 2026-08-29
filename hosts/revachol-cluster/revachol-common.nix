@@ -244,28 +244,29 @@
   # per-domain resolver, so tailscaled's forwarder must dial the nameserver directly,
   # and that dial does not consult subnet routes, see tailscale/tailscale#12027) can
   # resolve the internal zones *.monederobox.dev and *.home. CoreDNS listens on the
-  # node's own 100.x tailnet address and forwards the internal zones to the cluster
-  # CoreDNS (192.168.1.200), everything else upstream. Point Tailscale split-DNS at
-  # THIS node's 100.x tailnet IP.
+  # tailscale0 interface (each node serves its own 100.x tailnet IPv4 + fd7a IPv6) and
+  # forwards the internal zones to the cluster CoreDNS (192.168.1.200), everything else
+  # upstream. Point Tailscale split-DNS at THIS node's 100.x tailnet IP.
+  #
+  # Bind by INTERFACE name, not a hardcoded IP: CoreDNS binds all addrs on the interface
+  # at startup (IPv4+IPv6), and if tailscale0 is absent it fails to bind and
+  # Restart=always retries until tailscaled brings the interface up — a LOUD failure,
+  # unlike ip_nonlocal_bind which silently binds a nonexistent address and black-holes.
+  # This also removes the per-host IP map (no stale-IP risk on node re-add) and the
+  # ip_nonlocal_bind sysctl. (Bind-by-name needs on all server blocks sharing :53 to
+  # avoid listener contention — done below.)
   services.coredns = {
     enable = true;
-    config = let
-      # Each cluster node serves its own tailnet (100.x) address.
-      tailnetIP = {
-        dubois = "100.73.155.27";
-        cuno = "100.83.160.122";
-        katsuragi = "100.104.15.104";
-      }.${config.networking.hostName} or "100.64.0.0";
-    in ''
+    config = ''
       monederobox.dev:53 home:53 {
-        bind ${tailnetIP}
+        bind tailscale0
         forward . 192.168.1.200
         cache 30
         errors
       }
 
       .:53 {
-        bind ${tailnetIP}
+        bind tailscale0
         forward . 1.1.1.1 9.9.9.9
         cache 300
         errors
@@ -273,9 +274,8 @@
     '';
   };
 
-  # CoreDNS must be able to bind its 100.x address before tailscale0 exists at boot,
-  # and must only come up after tailscaled assigned the address.
-  boot.kernel.sysctl."net.ipv4.ip_nonlocal_bind" = 1;
+  # Order CoreDNS after tailscaled so tailscale0 exists (and has its addr) before
+  # CoreDNS binds. Restart=always re-trials if the interface still isn't there.
   systemd.services.coredns = {
     after = [ "tailscaled.service" ];
     wants = [ "tailscaled.service" ];
@@ -284,11 +284,10 @@
       RestartSec = "5s";
     };
   };
-  # DNS is exposed ONLY on the tailnet interface — not on the LAN/WAN.
-  networking.firewall.interfaces."tailscale0" = {
-    allowedUDPPorts = [ 53 ];
-    allowedTCPPorts = [ 53 ];
-  };
+  # NOTE: networking.firewall.enable is FALSE on these nodes (see line ~71), so this is
+  # declarative INTENT only, not enforcement. tailscale0 is already in
+  # networking.firewall.trustedInterfaces (modules/nixos/tailscale.nix), redundant here.
+  # If you ever enable the firewall, re-check this actually scopes DNS to the tailnet.
 
   # For longhorn
   services.openiscsi = {
