@@ -28,9 +28,12 @@
   # "as if physically present" (e.g. it cannot reach the cluster's 192.168.1.200
   # Envoy/DNS LB from away). Advertising the home subnet makes Tailscale behave like
   # WireGuard: enable it, and you are on the home LAN from anywhere.
-  boot.kernel.sysctl = {
-    "net.ipv4.ip_forward" = "1";
-  };
+  #
+  # NOTE: net.ipv4.ip_forward is NOT set here — it is already defined per-host:
+  #   - cluster nodes set boot.kernel.sysctl."net.ipv4.ip_forward" = 1 in revachol-common.nix
+  #   - dolores sets it in dolores/default.nix
+  # Defining it in this shared module too would collide with those (NixOS: option defined
+  # multiple times), so it lives with each host instead.
 
   systemd.services.tailscale-autoconnect =
     let

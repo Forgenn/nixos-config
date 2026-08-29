@@ -145,6 +145,13 @@
     group = "root";
   };
 
+  # IP forwarding: required for dolores to act as a Tailscale subnet router
+  # (--advertise-routes in modules/nixos/tailscale.nix). Cluster nodes set this in
+  # revachol-common.nix; dolores sets it here since it deliberately doesn't import that.
+  boot.kernel.sysctl = {
+    "net.ipv4.ip_forward" = "1";
+  };
+
   # `nh os switch` instead of `sudo nixos-rebuild switch --flake /etc/nixos#dolores`.
   programs.nh = {
     enable = true;
