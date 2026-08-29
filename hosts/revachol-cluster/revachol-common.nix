@@ -240,6 +240,31 @@
   # Important to enable rpcbind for kubernetes NFS PVC mounting
   services.rpcbind.enable = true;
 
+  # Tailnet DNS forwarder so remote clients (notably Android, which refuses a LAN-IP
+  # nameserver for split-DNS — issue tailscale/tailscale#1956) can resolve the internal
+  # zones *.monederobox.dev and *.home. dnsmasq listens on the node's tailnet (100.x)
+  # and LAN IPs and forwards those zones to the cluster CoreDNS (192.168.1.200),
+  # everything else upstream. Point Tailscale split-DNS at THIS node's 100.x tailnet IP.
+  services.dnsmasq = {
+    enable = true;
+    settings = {
+      # Listen on the tailnet interface only — split-DNS clients query over Tailscale.
+      interface = [ "tailscale0" ];
+      bind-interfaces = true;
+      # forward the internal zones to the cluster CoreDNS
+      server = [
+        "/monederobox.dev/192.168.1.200"
+        "/home/192.168.1.200"
+        "1.1.1.1"
+        "8.8.8.8"
+      ];
+      no-resolv = true;
+      no-poll = true;
+      cache-size = 500;
+      local-ttl = 60;
+    };
+  };
+
   # For longhorn
   services.openiscsi = {
     enable = true;
