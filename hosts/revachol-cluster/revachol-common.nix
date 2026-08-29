@@ -286,7 +286,10 @@
     wants = [ "tailscaled.service" ];
     startLimitIntervalSec = 0;
     serviceConfig = {
-      Restart = "always";
+      # The NixOS services.coredns module defaults Restart to "on-failure"; we need
+      # "always" (to survive the expected boot race waiting for tailscale0). mkForce
+      # wins over the module's own default.
+      Restart = lib.mkForce "always";
       RestartSec = "5s";
     };
   };
