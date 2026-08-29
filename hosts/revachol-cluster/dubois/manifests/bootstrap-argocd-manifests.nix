@@ -69,6 +69,13 @@ in
               syncOptions = [
                 "CreateNamespace=true"
                 "ServerSideApply=true"
+                # Without this, selfHeal reverts fields that ignoreDifferences tells
+                # ArgoCD to ignore: the CNPG/ESO operators rewrite their CRs' status +
+                # annotations, ArgoCD self-heals them back, loop forever -> the 5 DB apps
+                # (infisical, pocket-id, sparky-fitness, vaultwarden, hermes-agent) stay
+                # OutOfSync despite being Healthy and their drift being ignored. Respect
+                # the ignoreDifferences at sync time so self-heal stops fighting them.
+                "RespectIgnoreDifferences=true"
               ];
             };
             ignoreDifferences = [
@@ -101,6 +108,28 @@ in
                 kind = "StatefulSet";
                 jsonPointers = [
                   "/spec/volumeClaimTemplates"
+                ];
+              }
+              {
+                # CNPG operator rewrites the Cluster CR's status continuously, so
+                # ArgoCD self-heal (without RespectIgnoreDifferences) thrash-loops on it.
+                # Ignore the operator-owned status only -- spec stays diffed so real
+                # config drift still surfaces.
+                group = "postgresql.cnpg.io";
+                kind = "Cluster";
+                jqPathExpressions = [
+                  ".status"
+                ];
+              }
+              {
+                # ESO-managed Secret (e.g. vaultwarden) has data + annotations rewritten
+                # by the operator after ArgoCD applies it; ignore data + annotations so
+                # it reconciles, keeping spec/type diffed.
+                group = "";
+                kind = "Secret";
+                jqPathExpressions = [
+                  ".data"
+                  ".metadata.annotations"
                 ];
               }
             ];
