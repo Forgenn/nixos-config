@@ -274,20 +274,29 @@
     '';
   };
 
-  # Order CoreDNS after tailscaled so tailscale0 exists (and has its addr) before
-  # CoreDNS binds. Restart=always re-trials if the interface still isn't there.
+  # Order CoreDNS after tailscaled AND after the tailscale0 interface exists, otherwise
+  # on a cold boot CoreDNS loses the race (tailscaled creates tailscale0 asynchronously
+  # after auth/netmap) and fails its first start. The .device unit is what actually
+  # waits for the interface. startLimitIntervalSec=0 so Restart=always can retry forever
+  # without tripping the 5-per-10s start limit; deliberately NOT bindsTo tailscale0
+  # (that would stop CoreDNS when the interface is recreated, and a systemd stop isn't
+  # a restart → DNS could stay down).
   systemd.services.coredns = {
-    after = [ "tailscaled.service" ];
+    after = [ "tailscaled.service" "sys-subsystem-net-devices-tailscale0.device" ];
     wants = [ "tailscaled.service" ];
+    startLimitIntervalSec = 0;
     serviceConfig = {
       Restart = "always";
       RestartSec = "5s";
     };
   };
-  # NOTE: networking.firewall.enable is FALSE on these nodes (see line ~71), so this is
-  # declarative INTENT only, not enforcement. tailscale0 is already in
-  # networking.firewall.trustedInterfaces (modules/nixos/tailscale.nix), redundant here.
-  # If you ever enable the firewall, re-check this actually scopes DNS to the tailnet.
+  # NOTE: firewall.enable is FALSE on these nodes, so this block evaluates to "apply
+  # nothing" today — but it is CORRECT config the moment anyone flips the firewall on,
+  # scoping DNS to the tailnet rather than silently leaving 53 open or closed. Keep it.
+  networking.firewall.interfaces."tailscale0" = {
+    allowedUDPPorts = [ 53 ];
+    allowedTCPPorts = [ 53 ];
+  };
 
   # For longhorn
   services.openiscsi = {
