@@ -91,10 +91,14 @@ in
               {
                 group = "external-secrets.io";
                 kind = "ExternalSecret";
-                jsonPointers = [
-                  "/spec/conversionStrategy"
-                  "/spec/decodingStrategy"
-                  "/spec/metadataPolicy"
+                # The old top-level /spec/conversionStrategy etc. paths are inert (in
+                # external-secrets.io/v1 those live under .spec.data[].remoteRef.*, not
+                # top-level spec). hermes-agent now materializes them in git. What ESO
+                # actually rewrites on the CR is status + annotations; ignore those so
+                # ExternalSecrets reconcile without hiding real spec/data changes.
+                jqPathExpressions = [
+                  ".status"
+                  ".metadata.annotations"
                 ];
               }
               {
@@ -150,13 +154,16 @@ in
                 ];
               }
               {
-                # ESO-managed Secret (e.g. vaultwarden) has data + annotations rewritten
-                # by the operator after ArgoCD applies it; ignore data + annotations so
-                # it reconciles, keeping spec/type diffed.
+                # ESO-managed Secret: the operator rewrites annotations after ArgoCD
+                # applies it. Scoped to the specific vaultwarden secret by name+namespace
+                # and ignores ONLY annotations (NOT .data) so a rotated credential in git
+                # still applies. A kind-wide unnamed /data ignore would silently never
+                # write Secret data on any app — avoid that (audit constraint).
                 group = "";
                 kind = "Secret";
+                name = "vaultwarden-secrets";
+                namespace = "vaultwarden";
                 jqPathExpressions = [
-                  ".data"
                   ".metadata.annotations"
                 ];
               }
