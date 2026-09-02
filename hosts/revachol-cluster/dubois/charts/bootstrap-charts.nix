@@ -34,8 +34,15 @@
       #  createNamespace = true;
       #};
 
+      # ArgoCD is now fully self-managed by the gitops-cluster/infra/argocd app
+      # (includeCRDs + SSD + full chart ownership). Disabling this k3s helm-controller
+      # release removes the SECOND owner that was fighting the self-managed app
+      # (flapping argocd-cm / argocd-cmd-params-cm / controller rolls). Keep the block
+      # as documentation of the original bootstrap; enable=false stops helm-controller
+      # from re-installing it. Deliberately NOT deleted so a fresh-cluster rebuild can
+      # reference the minimal bootstrap shape (chart, namespace, buildOptions only).
       argocd = {
-        enable = true;
+        enable = false;
         name = "argo-cd";
         repo = "https://argoproj.github.io/argo-helm";
         version = "8.0.16";

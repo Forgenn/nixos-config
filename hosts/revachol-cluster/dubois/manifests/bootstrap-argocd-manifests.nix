@@ -174,28 +174,6 @@ in
     };
   };
 
-  argocd-kustomize-options-cm = {
-    enable = true;
-    content = {
-      apiVersion = "v1";
-      kind = "ConfigMap";
-      metadata = {
-        name = "argocd-cm";
-        namespace = "argocd";
-      };
-      data = {
-        # This line was already present
-        "kustomize.buildOptions" = "--enable-helm";
-
-        # This is the new section to ignore the annotation
-        "resource.customizations.ignoreDifferences.apps_Deployment" = ''
-          jsonPointers:
-          - /spec/template/metadata/annotations/updatedAt
-        '';
-      };
-    };
-  };
-
   kube-system-etcd-endpoints = {
     enable = true;
     # ArgoCD's argocd-cm ships (via the argo-helm chart's own defaults, not anything set
