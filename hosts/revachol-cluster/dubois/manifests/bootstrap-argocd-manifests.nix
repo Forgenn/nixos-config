@@ -161,7 +161,7 @@ in
                 # write Secret data on any app — avoid that (audit constraint).
                 group = "";
                 kind = "Secret";
-                name = "vaultwarden-secrets";
+                name = "vaultwarden";
                 namespace = "vaultwarden";
                 jqPathExpressions = [
                   ".metadata.annotations"
