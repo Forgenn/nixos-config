@@ -102,19 +102,6 @@ in
                 ];
               }
               {
-                # StatefulSets server-side-default volumeClaimTemplates[].status.phase
-                # and .volumeMode, which git never specifies -- classic ArgoCD SSA diff
-                # that kept zot, karakeep, pocket-id, infisical (redis), and seaweedfs
-                # permanently OutOfSync despite being genuinely healthy and in sync.
-                # Applied live via `kubectl patch applicationset` first (Opus 5 audit
-                # finding, 2026-08-27); mirrored here so it survives the next switch.
-                group = "apps";
-                kind = "StatefulSet";
-                jsonPointers = [
-                  "/spec/volumeClaimTemplates"
-                ];
-              }
-              {
                 # CNPG operator (admission webhook) defaults many Cluster spec fields at
                 # apply time that git never declares (enablePDB, failoverDelay, monitoring,
                 # postgresUID/GID, primaryUpdateMethod, probes, replicationSlots,
