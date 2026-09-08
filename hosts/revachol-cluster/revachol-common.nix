@@ -274,9 +274,11 @@
     # store path, so it keeps working across `nh os switch` and nix-gc without
     # depending on iscsid having been restarted. The bind can still dangle if
     # iscsid is not restarted (e.g. restartTriggers skipped); this catches
-    # that case. Verified 2026-09-08 on all three nodes: a hand-made version of
+    # that case. L+ (not L) because a hand-made link to a store path already
+    # exists on all three nodes and plain L would leave it in place.
+    # Verified 2026-09-08 on all three nodes: a hand-made version of
     # this link brought crashlooping longhorn-managers straight back.
-    "L /usr/bin/iscsiadm - - - - /run/current-system/sw/bin/iscsiadm"
+    "L+ /usr/bin/iscsiadm - - - - /run/current-system/sw/bin/iscsiadm"
   ];
 
   boot.blacklistedKernelModules = [ "nfsv3" ];
