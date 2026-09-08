@@ -268,6 +268,15 @@
   systemd.tmpfiles.rules = [
     # Create a symbolic link /usr/bin/mount -> /run/current-system/sw/bin/mount
     "L /usr/bin/mount - - - - /run/current-system/sw/bin/mount"
+    # Second line of defence for the iscsid BindPaths problem above. Longhorn
+    # resolves iscsiadm through its container PATH (/usr/bin before /bin), and
+    # this symlink targets the /run/current-system indirection rather than a
+    # store path, so it keeps working across `nh os switch` and nix-gc without
+    # depending on iscsid having been restarted. The bind can still dangle if
+    # iscsid is not restarted (e.g. restartTriggers skipped); this catches
+    # that case. Verified 2026-09-08 on all three nodes: a hand-made version of
+    # this link brought crashlooping longhorn-managers straight back.
+    "L /usr/bin/iscsiadm - - - - /run/current-system/sw/bin/iscsiadm"
   ];
 
   boot.blacklistedKernelModules = [ "nfsv3" ];
