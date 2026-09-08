@@ -248,9 +248,20 @@
 
   # Longhorn (specifically nsenter) expects the necessary binaries in /bin.
   # so we bind the binaries to path (https://github.com/longhorn/longhorn/issues/2166)
-  systemd.services.iscsid.serviceConfig = {
-    PrivateMounts = "yes";
-    BindPaths = "/run/current-system/sw/bin:/bin";
+  systemd.services.iscsid = {
+    serviceConfig = {
+      PrivateMounts = "yes";
+      BindPaths = "/run/current-system/sw/bin:/bin";
+    };
+    # The BindPaths above binds /run/current-system/sw/bin -> /bin, but
+    # /run/current-system is a symlink repointed on every `nh os switch`. A
+    # long-running iscsid keeps the OLD store path bound; once that path is
+    # GC'd the bind points at a deleted store path and iscsiadm vanishes from
+    # iscsid's mount namespace. longhorn-manager then nsenter's into iscsid's
+    # namespace to run iscsiadm and crashloops ("iscsiadm: No such file or
+    # directory"). Restart iscsid on every rebuild so the bind always follows
+    # the current system path. (2026-09-08: dubois hit this after gen 172.)
+    restartTriggers = [ config.system.build.toplevel ];
   };
 
   # same as above
