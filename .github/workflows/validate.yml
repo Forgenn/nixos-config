@@ -48,7 +48,9 @@ jobs:
       - uses: DeterminateSystems/nix-installer-action@3138316df39ed29be04236d7ffc686fa525866aa # v23
       - name: Evaluate ${{ matrix.host }}
         run: |
-          nix eval --raw \
+          # --show-trace always: this job exists to diagnose, and a truncated
+          # trace costs a whole CI round-trip to recover.
+          nix eval --raw --show-trace \
             ".#nixosConfigurations.${{ matrix.host }}.config.system.build.toplevel.drvPath"
 
   dry-run:
