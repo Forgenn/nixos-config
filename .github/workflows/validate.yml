@@ -28,7 +28,7 @@ jobs:
   # known-broken hosts below and cannot pass until they are fixed. Non-blocking
   # for now; flip continue-on-error off once `eval` is green for all seven.
   flake-check:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 20
     continue-on-error: true
     steps:
@@ -39,7 +39,7 @@ jobs:
       - run: nix flake check --no-build
 
   eval:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 20
     # A non-blocking host still runs and still shows red in the checks list --
     # it just does not gate the merge. The point is that the breakage stays
@@ -79,7 +79,7 @@ jobs:
             ".#nixosConfigurations.${{ matrix.host }}.config.system.build.toplevel.drvPath"
 
   dry-run:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 20
     # Deliberately not `needs: eval` -- a non-blocking eval failure would
     # otherwise skip this job, and a skipped check reports as neither success
