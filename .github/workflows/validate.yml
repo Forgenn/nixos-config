@@ -24,9 +24,9 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # flake-check evaluates every nixosConfiguration, so it inherits the
-  # known-broken hosts below and cannot pass until they are fixed. Non-blocking
-  # for now; flip continue-on-error off once `eval` is green for all seven.
+  # flake-check evaluates every nixosConfiguration, so it inherits as-pm's
+  # missing bootloader and cannot pass until that is configured. Non-blocking
+  # until then; drop continue-on-error once `eval (as-pm)` goes green.
   flake-check:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
@@ -51,21 +51,20 @@ jobs:
         include:
           - { host: dolores, blocking: true }
           - { host: hatsum, blocking: true }
-          # Known-broken on main, pre-dating this workflow. Each is a real bug
-          # this check surfaced, not a CI problem:
-          #   dubois/cuno/katsuragi -- hosts/revachol-cluster/revachol-common.nix
-          #     sets `restartTriggers = [ config.system.build.toplevel ]`, which
-          #     is infinite recursion: the unit is part of toplevel. The cluster
-          #     nodes cannot be rebuilt at all, which is why the 2026-09-08
-          #     iscsiadm fix never reached any node.
-          #   as-pm -- no bootloader configured anywhere, so the build asserts
-          #     "You must set boot.loader.grub.devices". Needs the operator: a
-          #     guessed bootloader is how you get an unbootable machine.
-          - { host: dubois, blocking: false }
-          - { host: cuno, blocking: false }
-          - { host: katsuragi, blocking: false }
-          - { host: as-pm, blocking: false }
+          # The cluster nodes were non-blocking until the restartTriggers
+          # recursion in revachol-common.nix was removed (#10) -- that bug made
+          # them impossible to evaluate, and therefore impossible to rebuild.
+          # Blocking now: a regression there costs the cluster its rebuilds.
+          - { host: dubois, blocking: true }
+          - { host: cuno, blocking: true }
+          - { host: katsuragi, blocking: true }
           - { host: t440, blocking: true }
+          # as-pm configures no bootloader anywhere, so evaluation asserts
+          # "You must set boot.loader.grub.devices". Knowingly left as-is by the
+          # operator (2026-09-20); guessing a bootloader is how a machine
+          # becomes unbootable. Non-blocking so it does not gate every PR, but
+          # still run so the day it is fixed, it starts passing on its own.
+          - { host: as-pm, blocking: false }
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
@@ -96,7 +95,7 @@ jobs:
         include:
           - { host: dolores, blocking: true }
           - { host: hatsum, blocking: true }
-          - { host: dubois, blocking: false }  # see the eval matrix
+          - { host: dubois, blocking: true }
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
