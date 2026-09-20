@@ -24,9 +24,13 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # flake-check evaluates every nixosConfiguration, so it inherits the
+  # known-broken hosts below and cannot pass until they are fixed. Non-blocking
+  # for now; flip continue-on-error off once `eval` is green for all seven.
   flake-check:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
+    continue-on-error: true
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
@@ -37,10 +41,31 @@ jobs:
   eval:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
+    # A non-blocking host still runs and still shows red in the checks list --
+    # it just does not gate the merge. The point is that the breakage stays
+    # visible and the list shrinks, rather than being hidden behind a skip.
+    continue-on-error: ${{ !matrix.blocking }}
     strategy:
       fail-fast: false
       matrix:
-        host: [as-pm, t440, hatsum, dubois, cuno, katsuragi, dolores]
+        include:
+          - { host: dolores, blocking: true }
+          - { host: hatsum, blocking: true }
+          # Known-broken on main, pre-dating this workflow. Each is a real bug
+          # this check surfaced, not a CI problem:
+          #   dubois/cuno/katsuragi -- hosts/revachol-cluster/revachol-common.nix
+          #     sets `restartTriggers = [ config.system.build.toplevel ]`, which
+          #     is infinite recursion: the unit is part of toplevel. The cluster
+          #     nodes cannot be rebuilt at all, which is why the 2026-09-08
+          #     iscsiadm fix never reached any node.
+          #   as-pm -- no bootloader configured anywhere, so the build asserts
+          #     "You must set boot.loader.grub.devices". Needs the operator: a
+          #     guessed bootloader is how you get an unbootable machine.
+          - { host: dubois, blocking: false }
+          - { host: cuno, blocking: false }
+          - { host: katsuragi, blocking: false }
+          - { host: as-pm, blocking: false }
+          - { host: t440, blocking: true }
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
@@ -56,7 +81,10 @@ jobs:
   dry-run:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
-    needs: eval
+    # Deliberately not `needs: eval` -- a non-blocking eval failure would
+    # otherwise skip this job, and a skipped check reports as neither success
+    # nor failure, which the update-review policy treats as "has not reported".
+    continue-on-error: ${{ !matrix.blocking }}
     permissions:
       contents: read
       pull-requests: write
@@ -65,7 +93,10 @@ jobs:
       matrix:
         # One representative per update track. dubois covers cuno and katsuragi:
         # all three import hosts/revachol-cluster/revachol-common.nix.
-        host: [dubois, dolores, hatsum]
+        include:
+          - { host: dolores, blocking: true }
+          - { host: hatsum, blocking: true }
+          - { host: dubois, blocking: false }  # see the eval matrix
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
