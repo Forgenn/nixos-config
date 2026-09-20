@@ -4,6 +4,23 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
+
+    # Update tracks. All three follow nixos-26.05; they are SEPARATE inputs so
+    # a workstation bump never moves the k3s control plane. One shared nixpkgs
+    # meant one `nix flake update` moved all seven machines at once -- and
+    # nixpkgs is not pinned for k3s, so that bump carries the cluster's
+    # Kubernetes version and the node kernel with it.
+    #
+    # Renovate groups them by these names with different cadences and soak
+    # times (see .github/renovate.json5): workstations weekly/2d, NAS
+    # biweekly/7d, cluster monthly/14d. The full "github:" form is required --
+    # lockFileMaintenance does not refresh a flake.lock without it
+    # (renovatebot/renovate#29721).
+    #
+    # Design: Forgenn/gitops-cluster docs/plans/2026-09-20-fleet-update-automation.md
+    nixpkgs-cluster.url = "github:NixOS/nixpkgs/nixos-26.05";
+    nixpkgs-nas.url = "github:NixOS/nixpkgs/nixos-26.05";
+
     nixpkgs-unstable.url = "nixpkgs/nixos-unstable";
     # hermes agent
     hermes-agent.url = "github:NousResearch/hermes-agent";
@@ -54,8 +71,12 @@
           extraModules ? [ ],
           isCluster ? false,
           clusterNode ? null,
+          # Which update track this host follows. Defaults to the workstation
+          # track; cluster nodes and the NAS pass their own input so their
+          # nixpkgs moves on its own schedule.
+          pkgsInput ? nixpkgs,
         }:
-        nixpkgs.lib.nixosSystem {
+        pkgsInput.lib.nixosSystem {
           inherit system;
           specialArgs = {
             inherit
@@ -154,6 +175,7 @@
           user = "ntb";
           isCluster = true;
           clusterNode = "dubois";
+          pkgsInput = inputs.nixpkgs-cluster;
         };
 
         cuno = mkNixosSystem {
@@ -162,6 +184,7 @@
           user = "ntb";
           isCluster = true;
           clusterNode = "cuno";
+          pkgsInput = inputs.nixpkgs-cluster;
         };
 
         katsuragi = mkNixosSystem {
@@ -170,6 +193,7 @@
           user = "ntb";
           isCluster = true;
           clusterNode = "katsuragi";
+          pkgsInput = inputs.nixpkgs-cluster;
         };
 
         ############################
@@ -181,6 +205,7 @@
           system = "x86_64-linux";
           device = "dolores";
           user = "ntb";
+          pkgsInput = inputs.nixpkgs-nas;
         };
       };
 
