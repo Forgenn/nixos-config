@@ -40,7 +40,7 @@ in
     # Enable this module to generate the config and potentially set things up
     enable = true;
     # Specify the package (consistent with configuration.nix)
-    package = pkgs.i3-gaps;
+    package = pkgs.i3;
 
     extraConfig = "popup_during_fullscreen smart\n";
 
@@ -277,7 +277,7 @@ in
         "${mod}+Shift+c" = "reload";
         "${mod}+Shift+r" = "restart";
         "${mod}+Shift+e" =
-          "exec \"${pkgs.i3-gaps}/bin/i3-nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -B 'Yes, exit i3' 'i3-msg exit'\"";
+          "exec \"${pkgs.i3}/bin/i3-nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -B 'Yes, exit i3' 'i3-msg exit'\"";
 
         # --- Resize Mode ---
         "${mod}+r" = "mode \"resize\"";
