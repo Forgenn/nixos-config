@@ -1,0 +1,121 @@
+{
+  $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+  extends: [
+    'config:recommended',
+    ':dependencyDashboard',
+    ':semanticCommits',
+  ],
+  timezone: 'Europe/Madrid',
+  labels: [
+    'renovate',
+  ],
+  reviewers: [
+    'Forgenn',
+  ],
+  commitMessagePrefix: 'chore(deps):',
+  // Renovate never merges here. Merge authority sits in exactly one place --
+  // the homelab-ops update-review job -- which reads the labels below as its
+  // risk signal. Nothing in this repo auto-merges regardless: nixpkgs is not
+  // pinned for k3s, so a lock bump moves the cluster's Kubernetes version and
+  // the node kernel.
+  // Design: Forgenn/gitops-cluster docs/plans/2026-09-20-fleet-update-automation.md
+
+  // The nix manager is opt-in: its default config carries enabled:false, which
+  // is the usual reason people find Renovate silently never touches flake.lock.
+  nix: {
+    enabled: true,
+  },
+  // Flake inputs are tracked by ref, so a branch-tracking input never has a
+  // "newer version" to find. lockFileMaintenance is the feature that actually
+  // moves each input to the head of its ref.
+  lockFileMaintenance: {
+    enabled: true,
+    schedule: [
+      'after 3am and before 6am on monday',
+    ],
+  },
+  packageRules: [
+    {
+      description: 'Workstations (as-pm, t440, hatsum) -- weekly, short soak',
+      matchDepNames: [
+        'nixpkgs',
+      ],
+      groupName: 'workstation track',
+      addLabels: [
+        'track:workstation',
+      ],
+      minimumReleaseAge: '2 days',
+      schedule: [
+        'after 3am and before 6am on monday',
+      ],
+    },
+    {
+      description: 'dolores NAS -- biweekly, longer soak (ZFS lags kernel support)',
+      matchDepNames: [
+        'nixpkgs-nas',
+      ],
+      groupName: 'nas track',
+      addLabels: [
+        'track:nas',
+      ],
+      minimumReleaseAge: '7 days',
+      schedule: [
+        'after 3am and before 6am on the first day of the month',
+      ],
+    },
+    {
+      description: 'k3s nodes -- monthly, longest soak. nixpkgs moves k3s and the kernel.',
+      matchDepNames: [
+        'nixpkgs-cluster',
+      ],
+      groupName: 'cluster track',
+      addLabels: [
+        'track:cluster',
+      ],
+      minimumReleaseAge: '14 days',
+      schedule: [
+        'after 3am and before 6am on the first day of the month',
+      ],
+      prPriority: -1,
+    },
+    // Classification labels. The update-review policy matches on these and
+    // nothing else -- it never parses a branch name or a PR title. Last so
+    // addLabels applies on top of the track rules above.
+    {
+      description: 'Classification label: patch',
+      matchUpdateTypes: [
+        'patch',
+      ],
+      addLabels: [
+        'patch',
+      ],
+    },
+    {
+      description: 'Classification label: minor',
+      matchUpdateTypes: [
+        'minor',
+      ],
+      addLabels: [
+        'minor',
+      ],
+    },
+    {
+      description: 'Classification label: major',
+      matchUpdateTypes: [
+        'major',
+      ],
+      addLabels: [
+        'major',
+      ],
+    },
+    {
+      description: 'Classification label: digest',
+      matchUpdateTypes: [
+        'digest',
+      ],
+      addLabels: [
+        'digest',
+      ],
+    },
+  ],
+}
