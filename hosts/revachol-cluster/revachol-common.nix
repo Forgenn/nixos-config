@@ -259,9 +259,30 @@
     # GC'd the bind points at a deleted store path and iscsiadm vanishes from
     # iscsid's mount namespace. longhorn-manager then nsenter's into iscsid's
     # namespace to run iscsiadm and crashloops ("iscsiadm: No such file or
-    # directory"). Restart iscsid on every rebuild so the bind always follows
-    # the current system path. (2026-09-08: dubois hit this after gen 172.)
-    restartTriggers = [ config.system.build.toplevel ];
+    # directory"). (2026-09-08: dubois hit this after gen 172.)
+    #
+    # This used to carry `restartTriggers = [ config.system.build.toplevel ]`
+    # to restart iscsid on every rebuild. That is INFINITE RECURSION: this unit
+    # is part of toplevel, so toplevel cannot be evaluated to decide whether to
+    # restart the unit that defines it. It made the three cluster nodes
+    # impossible to evaluate at all -- `nixos-rebuild` failed outright, which is
+    # why the very fix it belonged to never reached a node. It went unnoticed
+    # for twelve days because every node's /etc/nixos checkout predated it
+    # (dubois sat at 5a812db, 2026-09-03), so nothing had pulled it yet.
+    # Reproduced and confirmed on dubois 2026-09-20: eval fails with this line,
+    # succeeds with it removed, nothing else changed.
+    #
+    # The `L+ /usr/bin/iscsiadm` tmpfiles rule below is what handles this now.
+    # It targets the /run/current-system indirection rather than a store path,
+    # so it follows every switch without anything being restarted, and Longhorn
+    # resolves iscsiadm through /usr/bin before /bin. Its own comment records
+    # that it was verified on all three nodes -- restoring crashlooping
+    # longhorn-managers -- precisely in the case where iscsid was NOT restarted.
+    #
+    # If the restart is ever genuinely wanted back, it has to come from outside
+    # toplevel (a system.activationScripts entry running `systemctl try-restart
+    # iscsid`), never from restartTriggers. Be deliberate about it: restarting
+    # iscsid disturbs live iSCSI sessions, i.e. attached Longhorn volumes.
   };
 
   # same as above
