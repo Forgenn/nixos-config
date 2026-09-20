@@ -1,0 +1,103 @@
+# Evaluates the flake for every host on each PR.
+#
+# Evaluate, don't build. Every overlay in this repo is commented out
+# (hosts/as-pm/overlays.nix -- "Not using overlays currently"), so the fleet is
+# stock nixpkgs: `nixos-rebuild build` would only re-download paths the hosts
+# fetch from cache.nixos.org themselves, and a binary cache would duplicate
+# what cache.nixos.org already is. What a bad flake.lock bump actually breaks
+# is evaluation -- a removed module option, a renamed package, a changed
+# default -- and that needs no realised closure. Eval is cheap enough to cover
+# all seven hosts rather than a sample.
+#
+# Design: Forgenn/gitops-cluster docs/plans/2026-09-20-fleet-update-automation.md
+name: validate
+
+on:
+  pull_request:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: validate-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  flake-check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: DeterminateSystems/nix-installer-action@3138316df39ed29be04236d7ffc686fa525866aa # v23
+      - run: nix flake check --no-build
+
+  eval:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        host: [as-pm, t440, hatsum, dubois, cuno, katsuragi, dolores]
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: DeterminateSystems/nix-installer-action@3138316df39ed29be04236d7ffc686fa525866aa # v23
+      - name: Evaluate ${{ matrix.host }}
+        run: |
+          nix eval --raw \
+            ".#nixosConfigurations.${{ matrix.host }}.config.system.build.toplevel.drvPath"
+
+  dry-run:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    needs: eval
+    permissions:
+      contents: read
+      pull-requests: write
+    strategy:
+      fail-fast: false
+      matrix:
+        # One representative per update track. dubois covers cuno and katsuragi:
+        # all three import hosts/revachol-cluster/revachol-common.nix.
+        host: [dubois, dolores, hatsum]
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: DeterminateSystems/nix-installer-action@3138316df39ed29be04236d7ffc686fa525866aa # v23
+
+      - name: What would change on ${{ matrix.host }}
+        run: |
+          set -uo pipefail
+          # --dry-run reports on stderr what it *would* fetch, without fetching.
+          # That list names the packages actually moving, which is the review
+          # artifact the update-review bot feeds to `claude -p` -- far more
+          # readable than a flake.lock hash diff.
+          nix build --dry-run \
+            ".#nixosConfigurations.${{ matrix.host }}.config.system.build.toplevel" \
+            2> "dry-run-${{ matrix.host }}.txt"
+          status=$?
+          cat "dry-run-${{ matrix.host }}.txt"
+          exit $status
+
+      - name: Publish the fetch list to the PR
+        if: github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          # The <!-- nix-dry-run:HOST --> marker is a contract with the
+          # update-review skill's review.py. Do not change it in isolation.
+          {
+            echo "<!-- nix-dry-run:${{ matrix.host }} -->"
+            echo "### \`nix build --dry-run\` — ${{ matrix.host }}"
+            echo ''
+            echo '```'
+            head -c 60000 "dry-run-${{ matrix.host }}.txt"
+            echo '```'
+          } > comment.md
+          gh pr comment "${{ github.event.pull_request.number }}" --body-file comment.md

@@ -1,0 +1,7 @@
+# Committed from a Windows workstation, consumed by Linux tooling only.
+*.sh text eol=lf
+*.nix text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.json text eol=lf
+*.json5 text eol=lf
