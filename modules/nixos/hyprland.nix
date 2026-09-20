@@ -12,7 +12,7 @@ let
   mainMod = "SUPER"; # The "Windows" key
   terminal = "${pkgs.ghostty}/bin/ghostty";
   fileManager = "${pkgs.nautilus}/bin/nautilus"; # The file manager to launch
-  launcher = "${pkgs.rofi-wayland}/bin/rofi -show drun"; # The app launcher
+  launcher = "${pkgs.rofi}/bin/rofi -show drun"; # The app launcher
   # Define the derivation once. It will be converted to a path string where needed.
   wallpaperDerivation = pkgs.fetchurl {
     url = "https://nextcloud.monederobox.xyz/s/wRf36sseHsgSnfW/download/disco_elysium_wallpaper.jpg";
