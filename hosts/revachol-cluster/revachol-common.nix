@@ -11,6 +11,7 @@
   imports = [
     # Shared Tailscale/subnet-router config (imported by cluster nodes + dolores).
     ../../modules/nixos/tailscale.nix
+    ../../modules/nixos/hermes-agent-egress.nix # no network reach beyond the pod's own (gitops hermes-agent egress policy)
   ];
 
   # Previously pinned+compiled a custom 6.17 from source to work around an NFS xattr
@@ -206,7 +207,8 @@
     description = "hermes-agent (in-cluster AI agent, restricted)";
     extraGroups = [ ];
     openssh.authorizedKeys.keys = [
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDqP4PADPm46nKG42mtxc2tpn4xeuNM9qjW+GWz4qqzT hermes-agent-fleet-ssh"
+      # restrict,pty: no port/agent/X11 forwarding (no tunnels around hermes-agent-egress)
+      "restrict,pty ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDqP4PADPm46nKG42mtxc2tpn4xeuNM9qjW+GWz4qqzT hermes-agent-fleet-ssh"
     ];
   };
 
