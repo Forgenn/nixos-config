@@ -106,6 +106,15 @@
     "net.ipv4.ip_forward" = 1;
   };
 
+  # k3s (kube-router/flannel) rewrites iptables when it starts, which can drop the
+  # rules tailscaled installs to forward and masquerade subnet-router traffic: the
+  # router node then forwards nothing (seen 2026-10-01 on dubois, 2026-10-05 on cuno,
+  # both after k3s restarted later than tailscaled). Restart tailscaled a minute
+  # after k3s starts, so its rules are reinstalled on top.
+  systemd.services.k3s.serviceConfig.ExecStartPost = [
+    "-+${pkgs.systemd}/bin/systemd-run --on-active=60 ${pkgs.systemd}/bin/systemctl restart tailscaled.service"
+  ];
+
   # Enable agenix
   age = {
     identityPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
