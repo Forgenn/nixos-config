@@ -11,6 +11,7 @@
   imports = [
     # Shared Tailscale/subnet-router config (imported by cluster nodes + dolores).
     ../../modules/nixos/tailscale.nix
+    ../../modules/nixos/k3s-gvisor.nix # gVisor runtime for sandboxed pods (RuntimeClass gvisor)
     ../../modules/nixos/hermes-agent-egress.nix # no network reach beyond the pod's own (gitops hermes-agent egress policy)
   ];
 
