@@ -61,6 +61,32 @@
   services.prometheus.exporters.node.enable = true;
   services.prometheus.exporters.node.enabledCollectors = [ "systemd" ];
 
+  # WAN canary: blackbox_exporter probing external HTTPS endpoints so a flapping
+  # ISP line shows up in Prometheus instead of only as "phone has no connectivity"
+  # incidents (2026-11-02: WAN-IP lookups failed 11:32/12:37/13:42 and the updater
+  # hung 11:57-12:37, while the whole cluster and LAN stayed healthy; phone
+  # Tailscale went red -- controlplane unreachable through the dead WAN). Scraped
+  # in-cluster as job "dolores-blackbox" (gitops infra/monitoring values.yaml);
+  # the alert rules live in infra/monitoring/wan-alerts.yaml. Probing more than
+  # one target from the same exporter keeps this a single service with one config.
+  services.prometheus.exporters.blackbox = {
+    enable = true;
+    port = 9115;
+    config = {
+      modules = {
+        http_2xx = {
+          prober = "http";
+          timeout = "5s";
+          http = {
+            preferred_ip_protocol = "ip4";
+            follow_redirects = false;
+            fail_if_not_ssl = true;
+          };
+        };
+      };
+    };
+  };
+
   # rpcbind/nfsd were previously LAN-wide (a TODO from the initial migration, now
   # closed) despite only ever being consumed by the 3 cluster nodes -- NFS on a
   # no_root_squash export is real exposure to leave open to the whole LAN. Scoped here
@@ -70,6 +96,11 @@
     iptables -A nixos-fw -p tcp -s 192.168.1.155 --dport 9100 -j nixos-fw-accept
     iptables -A nixos-fw -p tcp -s 192.168.1.156 --dport 9100 -j nixos-fw-accept
     iptables -A nixos-fw -p tcp -s 192.168.1.157 --dport 9100 -j nixos-fw-accept
+
+    # blackbox_exporter (WAN canary) -- same scoping as node_exporter above
+    iptables -A nixos-fw -p tcp -s 192.168.1.155 --dport 9115 -j nixos-fw-accept
+    iptables -A nixos-fw -p tcp -s 192.168.1.156 --dport 9115 -j nixos-fw-accept
+    iptables -A nixos-fw -p tcp -s 192.168.1.157 --dport 9115 -j nixos-fw-accept
 
     iptables -A nixos-fw -p tcp -s 192.168.1.155 --dport 111 -j nixos-fw-accept
     iptables -A nixos-fw -p tcp -s 192.168.1.156 --dport 111 -j nixos-fw-accept
