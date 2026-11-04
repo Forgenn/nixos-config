@@ -19,8 +19,9 @@ in
 
   services.k3s = {
     enable = true;
-    # HA conversion: was "agent" (worker-only). Now "server" with no clusterInit (that's
-    # dubois's job, see master-k3s-config.nix) and serverAddr pointing at the existing
+    # HA conversion: was "agent" (worker-only). Now "server" with no clusterInit (only
+    # dubois ever founds the cluster, and only with revachol.k3s.founding, see
+    # master-k3s-config.nix) and serverAddr pointing at the existing
     # cluster -- k3s's built-in join mechanism handles etcd membership automatically, no
     # manual etcd surgery. Root motivation: dubois's single-member etcd meant its own
     # disk stalls could take down the whole apiserver; a real 3-member quorum means a

@@ -12,13 +12,54 @@ let
   kubeMasterHostname = "api.kube-cluster.revachol.home";
   #kubeMasterAPIServerPort = 6443;
 
-  bootStrapCharts = import ./charts/bootstrap-charts.nix { inherit pkgs config lib; };
+  cfg = config.revachol.k3s;
+  kubeAPIServerPort = 6443;
+
+  bootStrapCharts = import ./charts/bootstrap-charts.nix {
+    inherit pkgs config lib;
+    inherit (cfg) founding;
+  };
   argocdManifests = import ./manifests/bootstrap-argocd-manifests.nix { inherit pkgs config lib; };
   democraticCsiConfig = import ./manifests/bootstrap-democratic-csi-zfs.nix {
     inherit pkgs config lib; # Pass pkgs for yq
   };
 in
 {
+  # dubois's etcd role. Founding a cluster and joining one are different k3s starts,
+  # and k3s only consults them while the node's etcd data dir is empty: once
+  # /var/lib/rancher/k3s/server/db holds a member, --cluster-init and --server are both
+  # ignored (https://docs.k3s.io/datastore/ha-embedded, "Existing single-node
+  # clusters"). With an empty data dir, --cluster-init and no --server starts a NEW
+  # single-member cluster -- so a permanent clusterInit = true turned a wiped or
+  # reinstalled dubois into a second, empty cluster instead of a returning member
+  # (k3s-io/k3s#13623 describes the same split for a removed init node).
+  # Procedure for both phases: docs/runbooks/cluster-nixos-rebuild.md.
+  options.revachol.k3s = {
+    founding = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = ''
+        Found a new cluster from dubois: k3s --cluster-init, and the k3s
+        helm-controller installs the bootstrap Argo CD release. Only for a cluster
+        that does not exist yet; turn it off again once cuno and katsuragi have joined
+        and Argo CD manages itself. Off (the default), dubois joins the existing
+        cluster through `joinVia`.
+      '';
+    };
+    joinVia = lib.mkOption {
+      type = lib.types.enum [
+        "cuno"
+        "katsuragi"
+      ];
+      default = "cuno";
+      description = ''
+        Server dubois joins through when it is not founding. Only read while dubois's
+        etcd data dir is empty (a rejoin after a wipe); pick a member that is up.
+      '';
+    };
+  };
+
+  config = {
   # resolve master hostname
   networking.extraHosts = "${kubeMasterIP} ${kubeMasterHostname}";
 
@@ -73,8 +114,12 @@ in
     # Management AND node
     role = "server";
     tokenFile = config.age.secrets.k3s_token.path;
-    clusterInit = true;
-    
+    # Founding: initialise a new etcd cluster. Otherwise join the existing one through
+    # another member -- never through api.kube-cluster.revachol.home, which resolves
+    # to dubois itself (see networking.extraHosts above).
+    clusterInit = cfg.founding;
+    serverAddr = lib.optionalString (!cfg.founding) "https://${cfg.joinVia}.home:${toString kubeAPIServerPort}";
+
     extraFlags = [
       "--tls-san=dubois.home,api.kube-cluster.revachol.home"  # The flag
       "--disable=traefik,servicelb"
@@ -94,8 +139,8 @@ in
       # on the CLI alongside it -- any other --etcd-s3-* flag on the command line makes
       # k3s ignore the Secret entirely, so bucket/endpoint/folder/creds all live in
       # etcd-s3-backup-manifest.yaml (deployed above) instead. Applies to every server
-      # node independently (each takes its own local etcd member snapshot); this is the
-      # clusterInit node so it's also where the Secret gets deployed once, cluster-wide.
+      # node independently (each takes its own local etcd member snapshot); dubois is
+      # also where the Secret gets deployed once, cluster-wide.
       "--etcd-s3"
       "--etcd-s3-config-secret=etcd-s3-backup-config"
       "--etcd-snapshot-schedule-cron=0 */6 * * *"
@@ -137,5 +182,6 @@ in
   ];
 
     autoDeployCharts = bootStrapCharts;
+  };
   };
 }
