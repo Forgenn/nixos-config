@@ -1,4 +1,5 @@
-{...}:
+# founding: config.revachol.k3s.founding (see master-k3s-config.nix).
+{ founding, ... }:
 {
       # If repos public, infisical/eso not needed on bootstrap
       #infisical = {
@@ -34,15 +35,16 @@
       #  createNamespace = true;
       #};
 
-      # ArgoCD is now fully self-managed by the gitops-cluster/infra/argocd app
-      # (includeCRDs + SSD + full chart ownership). Disabling this k3s helm-controller
-      # release removes the SECOND owner that was fighting the self-managed app
-      # (flapping argocd-cm / argocd-cmd-params-cm / controller rolls). Keep the block
-      # as documentation of the original bootstrap; enable=false stops helm-controller
-      # from re-installing it. Deliberately NOT deleted so a fresh-cluster rebuild can
-      # reference the minimal bootstrap shape (chart, namespace, buildOptions only).
+      # Bootstrap phase only. On a new cluster nothing else can install Argo CD, so the
+      # k3s helm-controller does it; from then on Argo CD is self-managed by the
+      # gitops-cluster/infra/argocd app (includeCRDs + SSD + full chart ownership), and
+      # this release left enabled would be a SECOND owner fighting that app (flapping
+      # argocd-cm / argocd-cmd-params-cm / controller rolls). So it follows
+      # revachol.k3s.founding: on while founding, off afterwards. Turning it off needs
+      # the HelmChart CR's finalizer stripped and the CR deleted first, or helm-controller
+      # uninstalls Argo CD -- see docs/runbooks/cluster-nixos-rebuild.md.
       argocd = {
-        enable = false;
+        enable = founding;
         name = "argo-cd";
         repo = "https://argoproj.github.io/argo-helm";
         version = "8.0.16";
