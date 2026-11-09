@@ -8,6 +8,12 @@
 }:
 
 {
+  # TRIM: SSDs had gone un-trimmed since node install (529 days) — discards counter
+  # showed ~150MB total per node. Packed FTL causes chronic write-latency collapse
+  # (0.8ms idle -> 50-85ms under write bursts), which wedged Longhorn replicas into
+  # the 2026-11-06..09 rebuild churn loops. Weekly fstrim keeps the FTL clean.
+  services.fstrim.enable = true;
+
   imports = [
     # Shared Tailscale/subnet-router config (imported by cluster nodes + dolores).
     ../../modules/nixos/tailscale.nix
