@@ -18,6 +18,11 @@
     # Shared Tailscale/subnet-router config (imported by cluster nodes + dolores).
     ../../modules/nixos/tailscale.nix
     ../../modules/nixos/k3s-gvisor.nix # gVisor runtime for sandboxed pods (RuntimeClass gvisor)
+    # Exports the versions the node actually runs (k3s, open-iscsi, booted vs
+    # switched generation) so a generation mismatch is alertable instead of
+    # silent -- the mismatch that wedged every Longhorn attach on dubois on
+    # 2026-11-27. See docs/runbooks/node-runtime-drift.md.
+    ../../modules/nixos/node-runtime-drift-metrics.nix
   ];
 
   # Previously pinned+compiled a custom 6.17 from source to work around an NFS xattr
