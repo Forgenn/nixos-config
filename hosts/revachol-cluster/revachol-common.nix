@@ -253,6 +253,59 @@
     name = "${config.networking.hostName}-initiatorhost";
   };
 
+  # Keep iSCSI node records out of persistent storage: /etc/iscsi/nodes is a
+  # version-specific cache, and a record written by a different open-iscsi
+  # patch release than the one reading it makes iscsiadm reject the WHOLE
+  # database at once ("iSCSI ERROR: Unknown parameter name
+  # node.session.<param> ... config file .../default invalid", exit 7) -- one
+  # bad record breaks every iscsiadm call on the node, not just its own target.
+  #
+  # Upstream changes these parameter names in patch releases:
+  #   * 2.1.11 -> 2.1.12 renamed node.session.conn_reopen_log_freq to
+  #     node.session.sess_reopen_log_freq (open-iscsi#540, Longhorn#13733 --
+  #     the reason Longhorn's install docs warn about open-iscsi 2.1.12);
+  #   * 2.1.13 added node.session.login_redirect_max, so a 2.1.12 iscsiadm
+  #     cannot read a record a 2.1.13 iscsiadm wrote.
+  # longhorn-manager runs the HOST's iscsiadm (`nsenter --mount=/host/proc/1/ns/mnt
+  # ... iscsiadm ...`; its image installs no open-iscsi), which is also why the
+  # /usr/bin/iscsiadm symlink below has to exist. The failure is therefore per
+  # node and total: every engine frontend on that node dies with "failed to
+  # start up frontend: Failed to get node.session.scan mode", which then also
+  # stalls volumes on the OTHER nodes whose engine lives there.
+  #
+  # 2026-11-27: this turned the site-wide power event into a ~4.5h outage.
+  # dubois had been switched to the newer nixpkgs-cluster lock (open-iscsi
+  # 2.1.13) without it becoming the boot default, so the reboot came back on the
+  # older generation (2.1.12; NixOS/nixpkgs a9e6d84 ships 2.1.12, the lock in
+  # flake.lock 1f607aa ships 2.1.13) and every node record dubois had written was
+  # suddenly unparseable: 294 "config file ... invalid" + 147 "failed to start
+  # up frontend" in one hour on dubois, 0 on cuno and katsuragi, which had not
+  # been switched.
+  #
+  # Node records are cache: Longhorn re-creates them on attach (the documented
+  # remedy for an unreadable record is to delete the directory anyway --
+  # open-iscsi#463), and at a boot no session can exist yet. Mounting tmpfs over
+  # the directory means a record can only ever have been written by the open-iscsi
+  # version reading it, whatever generation a node happens to boot, and stops a
+  # future parameter change from wedging a node at all.
+  #
+  # Caveat, deliberately not covered: rolling a RUNNING node back to a generation
+  # with a different open-iscsi parameter set leaves the records the newer
+  # version wrote in RAM, and iscsid is not restarted by a rollback. Detect with
+  # `iscsiadm -m node -o show` (exit 7 / "Unknown parameter name") and clear with
+  # `rm -rf /etc/iscsi/nodes/*`; Longhorn re-creates the records on attach.
+  # See docs/runbooks/iscsi-node-records.md for the diagnosis and the remedy.
+  fileSystems."/etc/iscsi/nodes" = {
+    device = "tmpfs";
+    fsType = "tmpfs";
+    options = [
+      "mode=0755"
+      "nosuid"
+      "nodev"
+      "noexec"
+    ];
+  };
+
   # Longhorn (specifically nsenter) expects the necessary binaries in /bin.
   # so we bind the binaries to path (https://github.com/longhorn/longhorn/issues/2166)
   systemd.services.iscsid = {
