@@ -248,57 +248,96 @@
     name = "${config.networking.hostName}-initiatorhost";
   };
 
-  # Keep iSCSI node records out of persistent storage: /etc/iscsi/nodes is a
-  # version-specific cache, and a record written by a different open-iscsi
-  # patch release than the one reading it makes iscsiadm reject the WHOLE
-  # database at once ("iSCSI ERROR: Unknown parameter name
-  # node.session.<param> ... config file .../default invalid", exit 7) -- one
-  # bad record breaks every iscsiadm call on the node, not just its own target.
+  # Boot-time guard for the iSCSI node-record database in /etc/iscsi/nodes.
   #
-  # Upstream changes these parameter names in patch releases:
-  #   * 2.1.11 -> 2.1.12 renamed node.session.conn_reopen_log_freq to
-  #     node.session.sess_reopen_log_freq (open-iscsi#540, Longhorn#13733 --
-  #     the reason Longhorn's install docs warn about open-iscsi 2.1.12);
-  #   * 2.1.13 added node.session.login_redirect_max, so a 2.1.12 iscsiadm
-  #     cannot read a record a 2.1.13 iscsiadm wrote.
-  # longhorn-manager runs the HOST's iscsiadm (`nsenter --mount=/host/proc/1/ns/mnt
-  # ... iscsiadm ...`; its image installs no open-iscsi), which is also why the
-  # /usr/bin/iscsiadm symlink below has to exist. The failure is therefore per
-  # node and total: every engine frontend on that node dies with "failed to
-  # start up frontend: Failed to get node.session.scan mode", which then also
-  # stalls volumes on the OTHER nodes whose engine lives there.
+  # A node record that names a session parameter the local iscsiadm does not
+  # know makes iscsiadm reject the WHOLE database (idbm parses the directory in
+  # one pass), so one such record breaks every iscsiadm call on the node with
+  # "iSCSI ERROR: Unknown parameter name node.session.<param> ... config file
+  # .../default invalid", exit 7 -- not just its own target. longhorn-manager
+  # runs the HOST's iscsiadm (`nsenter --mount=/host/proc/1/ns/mnt ... iscsiadm`,
+  # its image installs no open-iscsi), so the whole node loses its engine
+  # frontends ("failed to start up frontend: Failed to get node.session.scan
+  # mode") and volumes on the other nodes whose engine lives there stall behind
+  # it.
   #
-  # 2026-11-27: this turned the site-wide power event into a ~4.5h outage.
+  # This is a version mismatch, and it can only be a record from an EARLIER boot:
+  # reader and writer within one boot are the same package. open-iscsi renames
+  # and adds these parameters in PATCH releases -- 2.1.11 -> 2.1.12 renamed
+  # node.session.conn_reopen_log_freq to node.session.sess_reopen_log_freq
+  # (open-iscsi#540, longhorn#13733 -- why Longhorn's install docs warn about
+  # 2.1.12), and 2.1.13 (2026-08-05) added node.session.login_redirect_max,
+  # absent in 2.1.9-2.1.12.
+  #
+  # 2026-11-27: that turned the site-wide power event into a ~4.5h outage.
   # dubois had been switched to the newer nixpkgs-cluster lock (open-iscsi
   # 2.1.13) without it becoming the boot default, so the reboot came back on the
-  # older generation (2.1.12; NixOS/nixpkgs a9e6d84 ships 2.1.12, the lock in
-  # flake.lock 1f607aa ships 2.1.13) and every node record dubois had written was
-  # suddenly unparseable: 294 "config file ... invalid" + 147 "failed to start
-  # up frontend" in one hour on dubois, 0 on cuno and katsuragi, which had not
-  # been switched.
+  # older generation (2.1.12 -- NixOS/nixpkgs a9e6d84 ships 2.1.12, the lock in
+  # flake.lock 1f607aa ships 2.1.13) and the records it had written were suddenly
+  # unreadable: 294 "config file ... invalid" + 147 "failed to start up
+  # frontend" in an hour on dubois, 0 on cuno and katsuragi, which had not been
+  # switched. Pol cleared it by hand with `rm -rf /etc/iscsi/nodes/*`.
   #
-  # Node records are cache: Longhorn re-creates them on attach (the documented
-  # remedy for an unreadable record is to delete the directory anyway --
-  # open-iscsi#463), and at a boot no session can exist yet. Mounting tmpfs over
-  # the directory means a record can only ever have been written by the open-iscsi
-  # version reading it, whatever generation a node happens to boot, and stops a
-  # future parameter change from wedging a node at all.
+  # The records are a cache: Longhorn re-creates them on attach, and at a boot no
+  # session can exist yet, so dropping them costs nothing (deleting the directory
+  # is open-iscsi's own remedy, open-iscsi#463). The guard runs once per boot,
+  # before iscsid, and touches nothing unless iscsiadm says the database is
+  # unreadable -- and only for that reason, not for e.g. an iscsid that is not up
+  # yet. It exits non-zero when it fires so the node shows up in
+  # `systemctl --failed` rather than recovering quietly.
   #
-  # Caveat, deliberately not covered: rolling a RUNNING node back to a generation
-  # with a different open-iscsi parameter set leaves the records the newer
-  # version wrote in RAM, and iscsid is not restarted by a rollback. Detect with
-  # `iscsiadm -m node -o show` (exit 7 / "Unknown parameter name") and clear with
-  # `rm -rf /etc/iscsi/nodes/*`; Longhorn re-creates the records on attach.
-  # See docs/runbooks/iscsi-node-records.md for the diagnosis and the remedy.
-  fileSystems."/etc/iscsi/nodes" = {
-    device = "tmpfs";
-    fsType = "tmpfs";
-    options = [
-      "mode=0755"
-      "nosuid"
-      "nodev"
-      "noexec"
-    ];
+  # What this does NOT fix: a node that boots an older generation than it was
+  # running still ran the mismatched open-iscsi until the reboot (the guard fires
+  # at the NEXT boot, when it may already have cost an outage), and a rollback in
+  # place leaves the newer version's records in RAM with iscsid not restarted.
+  # The discipline half is "nixos-rebuild boot", never a bare switch -- see
+  # docs/runbooks/cluster-nixos-rebuild.md; `iscsiadm -m node -o show` (exit 7)
+  # stays the detector for the rollback case.
+  # Diagnosis and remedy: docs/runbooks/iscsi-node-records.md
+  systemd.services.iscsi-node-record-guard = {
+    description = "Drop iSCSI node records this open-iscsi cannot read";
+    wantedBy = [ "iscsid.service" ];
+    before = [ "iscsid.service" ];
+    unitConfig.ConditionPathExists = "!/run/iscsi-node-record-guard.done";
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = false;
+    };
+    script = ''
+      # Not PATH: openiscsi installs iscsiadm into sbin, and systemd's `path`
+      # option only ever adds bin/.
+      iscsiadm="${config.services.openiscsi.package}/sbin/iscsiadm"
+      marker=/run/iscsi-node-record-guard.done
+
+      out=$("$iscsiadm" -m node -o show 2>&1)
+      rc=$?
+      # 0 = readable, 21 = ISCSI_ERR_NO_OBJS_FOUND, i.e. no records at all.
+      if [ "$rc" -eq 0 ] || [ "$rc" -eq 21 ]; then
+        touch "$marker"
+        exit 0
+      fi
+
+      # Only a record-format problem justifies dropping the database.
+      case "$out" in
+        *"Unknown parameter name"* | *"config file"*"invalid"*)
+          ;;
+        *)
+          echo "iscsi-node-record-guard: iscsiadm -m node -o show failed (exit $rc) for an unrelated reason; leaving /etc/iscsi/nodes alone:" >&2
+          echo "$out" >&2
+          exit 0
+          ;;
+      esac
+
+      echo "iscsi-node-record-guard: the iSCSI node database is unreadable by $("$iscsiadm" --version 2>&1) -- dropping it; Longhorn re-creates records on attach:" >&2
+      echo "$out" >&2
+      for dir in /etc/iscsi/nodes/*; do
+        [ -e "$dir" ] || continue
+        echo "iscsi-node-record-guard: dropped $(basename "$dir")" >&2
+      done
+      rm -rf /etc/iscsi/nodes/* /etc/iscsi/send_targets/*
+      touch "$marker"
+      exit 1
+    '';
   };
 
   # Longhorn (specifically nsenter) expects the necessary binaries in /bin.
