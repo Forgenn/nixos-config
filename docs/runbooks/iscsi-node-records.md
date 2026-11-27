@@ -70,14 +70,41 @@ not what makes `iscsiadm` re-read the database.
 
 ## Prevention
 
-- `/etc/iscsi/nodes` is a tmpfs on the cluster nodes
-  (`hosts/revachol-cluster/revachol-common.nix`): records cannot outlive a boot,
-  so a record is always read by the open-iscsi that wrote it, whatever
-  generation the node boots.
-- The remaining hole is a *running* node rolled back to an older open-iscsi
-  (`nixos-rebuild switch --rollback`): records written by the newer version stay
-  in RAM and `iscsid` is not restarted by a rollback. `iscsiadm -m node -o show`
-  (exit 7) is the detector; the fix above is the remedy.
-- Keep the nodes on the version the flake declares. `nixos-rebuild boot` and a
-  reboot is what makes a switch persistent — see
+`hosts/revachol-cluster/revachol-common.nix` installs
+`iscsi-node-record-guard.service`: a oneshot that runs once per boot, before
+`iscsid` (a `/run` marker keeps it from ever firing on a later `iscsid` restart,
+when live sessions exist). It runs `iscsiadm -m node -o show` and **only** if
+that fails with `Unknown parameter name` / `config file … invalid` does it drop
+`/etc/iscsi/nodes` and `/etc/iscsi/send_targets`, log the dropped directories and
+the iscsiadm version to the journal, and exit non-zero so the node turns up in
+`systemctl --failed`. Any other failure — an `iscsid` that is not up yet, say —
+leaves the records alone.
+
+Check it after a node reboot:
+
+```bash
+ssh <node> 'systemctl status iscsi-node-record-guard; journalctl -b -u iscsi-node-record-guard'
+```
+
+`failed` there is not a boot failure: it means the node came up with a
+mismatched open-iscsi and healed itself at the cost of a dropped cache. It is
+worth finding out why.
+
+What the guard cannot cover:
+
+- a node that boots an older generation than the one it was running **already
+  ran** the mismatched open-iscsi before the guard fired — the guard stops the
+  attach path wedging at the next boot, it does not prevent that outage;
+- a rollback in place (`nixos-rebuild switch --rollback`) leaves the newer
+  version's records in RAM, and `iscsid` is not restarted by a rollback.
+  `iscsiadm -m node -o show` (exit 7) is the detector and "Fix" above is the
+  remedy;
+- the state the fleet is in today — the nodes boot a generation older than
+  `flake.lock` declares. That is the discipline half: `nixos-rebuild boot`, never
+  a bare `switch`, then a reboot, per
   [cluster-nixos-rebuild.md](cluster-nixos-rebuild.md).
+
+Deliberately not done: mounting a tmpfs over `/etc/iscsi/nodes`. It removes the
+failure class without any logic, but it drops the records on every boot instead
+of only when they are unreadable, which loses the signal that a node booted a
+different open-iscsi.
