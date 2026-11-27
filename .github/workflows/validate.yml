@@ -120,16 +120,56 @@ jobs:
         if: github.event_name == 'pull_request'
         env:
           GH_TOKEN: ${{ github.token }}
+          HOST: ${{ matrix.host }}
+          PR: ${{ github.event.pull_request.number }}
         run: |
           set -euo pipefail
           # The <!-- nix-dry-run:HOST --> marker is a contract with the
           # update-review skill's review.py. Do not change it in isolation.
+          marker="<!-- nix-dry-run:${HOST} -->"
           {
-            echo "<!-- nix-dry-run:${{ matrix.host }} -->"
-            echo "### \`nix build --dry-run\` — ${{ matrix.host }}"
+            echo "$marker"
+            echo "### \`nix build --dry-run\` — ${HOST}"
             echo ''
             echo '```'
-            head -c 60000 "dry-run-${{ matrix.host }}.txt"
+            head -c 60000 "dry-run-${HOST}.txt"
             echo '```'
           } > comment.md
-          gh pr comment "${{ github.event.pull_request.number }}" --body-file comment.md
+
+          # Upsert, keyed on the marker: one comment per host per PR, not one
+          # per run. `gh pr comment` always created a new one, so every push to
+          # the PR -- and every re-run -- appended another 60 kB fetch list:
+          # PR #20 ends up carrying the dolores/dubois/hatsum lists twice, and
+          # review.py's review_material (which joins every comment containing
+          # the marker) then feeds the reviewer the same lists twice over.
+          repo_api="repos/${GITHUB_REPOSITORY}"
+          list_url="${repo_api}/issues/${PR}/comments"
+          comment_url="${repo_api}/issues/comments"
+          # --paginate prints each page as its own JSON document, which jq
+          # applies the filter to in turn. Comments come back oldest first, so
+          # the last match is the one to update and the rest are duplicates
+          # left behind by runs made before this step upserted.
+          ids=$(gh api --paginate "$list_url" \
+            | jq -r --arg m "$marker" '.[] | select(.body | startswith($m)) | .id')
+          keep=$(printf '%s\n' "$ids" | tail -n 1)
+
+          # --input with a jq-built payload, rather than -F body=@comment.md:
+          # that flag's typed-value magic parses literals and {owner}/{repo}
+          # placeholders, which has no business looking inside a 60 kB nix
+          # fetch list.
+          jq -Rs '{body: .}' comment.md > payload.json
+          if [ -n "$keep" ]; then
+            gh api --method PATCH "${comment_url}/${keep}" --input payload.json > /dev/null
+            echo "updated comment ${keep} ($(wc -c < comment.md) bytes) for ${HOST}"
+            printf '%s\n' "$ids" | head -n -1 | while read -r stale; do
+              [ -n "$stale" ] || continue
+              if gh api --method DELETE "${comment_url}/${stale}" > /dev/null; then
+                echo "removed stale duplicate comment ${stale} for ${HOST}"
+              else
+                echo "::warning::could not remove stale duplicate comment ${stale} for ${HOST}"
+              fi
+            done
+          else
+            gh api --method POST "$list_url" --input payload.json > /dev/null
+            echo "created comment for ${HOST} ($(wc -c < comment.md) bytes)"
+          fi
